@@ -79,7 +79,9 @@ class Cake(models.Model):
     def __str__(self):
         return self.title   # если нет названия, f(){описание из компонентов}
 
-
+    def get_price(self):
+        cake_params = [self.levels, self.shape, self.topping, self.berries, self.topping]
+        return sum([param.price for param in cake_params])
 
 
 
