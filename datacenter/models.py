@@ -13,6 +13,19 @@ class CakeParam(models.Model):
         abstract = True
 
 
+class Levels(CakeParam):
+    LEVEL_CHOICES = [
+        (1, '1 уровень'),
+        (2, '2 уровня'),
+        (3, '3 уровня')
+    ]
+    title = models.IntegerField(
+        'Количество уровней',
+        choices=LEVEL_CHOICES,
+        unique=True, 
+        default=1)
+
+
 class Shape(CakeParam):
     title = models.CharField('Название формы', max_length=20)
 
@@ -35,15 +48,11 @@ class Cake(models.Model):
     image = models.ImageField('Изображение', null=True, blank=True)     # только для оригинальных!
     description = models.TextField('Описание', null=True, blank=True)   # только для оригинальных?
 
-    LEVEL_CHOICES = [
-        (1, '1 уровень'),
-        (2, '2 уровня'),
-        (3, '3 уровня')
-    ]
-    levels = models.IntegerField(
-        'Количество уровней', 
-        choices=LEVEL_CHOICES,
-        default=1)
+    levels = models.ForeignKey(
+        Levels,
+        verbose_name='Уровни', 
+        default=1,
+        on_delete=models.CASCADE)  # какой on_delete лучше?
     shape = models.ForeignKey(
         Shape,
         verbose_name='Форма', 
@@ -67,9 +76,10 @@ class Cake(models.Model):
         max_length=100, 
         null=True, blank=True)
 
-
     def __str__(self):
         return self.title   # если нет названия, f(){описание из компонентов}
+
+
 
 
 
