@@ -1,4 +1,7 @@
 from django.db import models
+from datetime import timedelta
+from django.core.validators import MinValueValidator, MaxValueValidator
+from BakeCake.settings import URGENT_ORDER_ALLOWANCE
 
 
 class CakeParam(models.Model):
@@ -77,12 +80,17 @@ class Cake(models.Model):
         null=True, blank=True)
 
     def __str__(self):
-        return self.title   # если нет названия, f(){описание из компонентов}
+        if self.title:
+            return f'Торт {self.title}' 
+        return f'Торт #{self.id}'
+
+
+    def get_params(self):
+        return [self.levels, self.shape, 
+                self.topping, self.berries, self.topping]
 
     def get_price(self):
-        cake_params = [self.levels, self.shape, 
-                       self.topping, self.berries, self.topping]
-        return sum([param.price for param in cake_params])
+        return sum([param.price for param in self.get_params()])
 
 
 class Client(models.Model):
@@ -92,6 +100,25 @@ class Client(models.Model):
     consent_to_pdProc = models.BooleanField(
         'Согласие на обработку ПД',
         default=False)
+
+    def __str__(self):
+        return f'{self.name}, {self.id_telegram}'
+
+
+class Complaint(models.Model):
+    text = models.TextField('Текст жалобы')
+
+
+class PromoCode(models.Model):
+    code = models.CharField('Код', unique=True, max_length=20)
+    discount = models.DecimalField(
+        'Скидка',
+        max_digits=3, decimal_places=2,
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(1)])
+
+    def __str__(self):
+        return f'Код "{self.code}" на скидку {self.discount * 100}%'
 
 
 class Order(models.Model):
@@ -104,12 +131,36 @@ class Order(models.Model):
         verbose_name='Клиент',
         related_name='orders',
         on_delete=models.CASCADE)
-    creation = models.DateTimeField(
+    order_dt = models.DateTimeField(
         'Дата и время заказа',
         auto_now_add=True)
-    short_delivery_time = models.BooleanField(
-        'Сокращенное время доставки', 
-        default=False)
+    delivery_dt = models.DateTimeField(
+        'Дата и время доставки',
+        null=True, blank=True)
+    promo_code = models.ForeignKey(
+        PromoCode,
+        verbose_name='Промокод',
+        null=True, blank=True,
+        on_delete=models.SET_NULL)
     comment = models.TextField('Комментарий', null=True, blank=True)
+    complaint = models.OneToOneField(
+        Complaint, 
+        on_delete=models.SET_NULL,
+        null=True, blank=True)
+    # status
+
+    def is_urgent_order(self):
+        delta = self.delivery_dt - self.order_dt
+        return  delta < timedelta(days=1)
+
+    def get_price(self):
+        cake_price = self.cake.get_params()
+        order_price = cake_price * \
+                      (1 - self.promo_code.discount) * \
+                      (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
+        return round(order_price, 2)
+
+    def __str__(self):
+        return f'Заказ #{self.id}'
 
 

@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('datacenter', '0001_initial'),
+        ('bot', '0001_initial'),
     ]
 
     operations = [
@@ -26,6 +26,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cake',
             name='levels',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='datacenter.Levels', verbose_name='Уровни'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='bot.Levels', verbose_name='Уровни'),
         ),
     ]
