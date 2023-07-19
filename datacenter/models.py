@@ -94,5 +94,22 @@ class Client(models.Model):
         default=False)
 
 
+class Order(models.Model):
+    cake = models.ForeignKey(
+        Cake,
+        verbose_name='Торт',
+        on_delete=models.CASCADE)
+    client = models.ForeignKey(
+        Client,
+        verbose_name='Клиент',
+        related_name='orders',
+        on_delete=models.CASCADE)
+    creation = models.DateTimeField(
+        'Дата и время заказа',
+        auto_now_add=True)
+    short_delivery_time = models.BooleanField(
+        'Сокращенное время доставки', 
+        default=False)
+    comment = models.TextField('Комментарий', null=True, blank=True)
 
 
