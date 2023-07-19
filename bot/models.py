@@ -112,4 +112,7 @@ class Order(models.Model):
         default=False)
     comment = models.TextField('Комментарий', null=True, blank=True)
 
+    def price(self):
+        return 100
+
 

@@ -1,12 +1,12 @@
+import os
+import time
+
 from telebot import TeleBot, types
+from django.core.management.base import BaseCommand
 
-import datetime
-import re
-import requests
+from bot.views import get_user_orders, get_serialized_order
 
-from views import get_user_orders
-
-bot = TeleBot('6017270704:AAH9MTfQELdHSXbbCAwfPQXL-47Xnuhf0p8')
+bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
 
 @bot.message_handler(commands=['start'])
@@ -55,24 +55,28 @@ def callback_query(call):
         markup.add(button)
         bot.send_message(call.message.chat.id, 'Здесь будет инженер-конструктор', reply_markup=markup)
         bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data == 'view_order':
-        view_order()
+    if call.data[0] == 'view_order':
+        view_order(call.message, call.data[1])
         bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def my_orders(message):
 
-    id_telegram = message.user.id
+    id_telegram = message.chat.id
     orders = get_user_orders(id_telegram=id_telegram)
     markup = types.InlineKeyboardMarkup()
-    orders_buttons = [types.InlineKeyboardButton(text=order['description'], callback_data='view_order') for order in orders]
+    orders_buttons = [types.InlineKeyboardButton(text=order['description'], callback_data=f'view_order_{order["id"]}') for order in orders]
     button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
     markup.add(*orders_buttons, button)
     bot.send_message(message.chat.id, 'Список твоих последних заказов.', reply_markup=markup)
 
 
-def view_order(message):
-    pass
+def view_order(message, order_id):
+    order = get_serialized_order(order_id)
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
+    markup.add(button)
+    bot.send_message(message.chat.id, f'Данные о твоём заказе:\n{order}', reply_markup=markup)
 
 
 def order_cake(chat_id):
@@ -87,6 +91,18 @@ def order_cake(chat_id):
 
 def main():
     bot.polling()
+
+
+class Command(BaseCommand):
+    help = 'телеграм бот'
+
+    def handle(self, *args, **options):
+        while True:
+            try:
+                main()
+            except Exception as error:
+                print(error)
+                raise SystemExit
 
 
 if __name__ == '__main__':
