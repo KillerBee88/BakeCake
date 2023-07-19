@@ -111,14 +111,19 @@ def choose_berries(update, context):
 
 def choose_decor(update, context):
     context.user_data['decor'] = DECOR[update.message.text]
+    reply_keyboard = [['Пропустить']]
     update.message.reply_text(
-        'Введите комментарий к заказу (необязательно):'
+        'Введите комментарий к заказу (необязательно):',
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     )
     return CHOOSING_COMMENT
 
-
 def choose_comment(update, context):
-    context.user_data['comment'] = update.message.text
+    user_input = update.message.text
+    if user_input != 'Пропустить':
+        context.user_data['comment'] = user_input
+    else:
+        context.user_data['comment'] = ''
     reply_keyboard = [['Да', 'Нет']]
     update.message.reply_text(
         'Желаете подтвердить заказ?',
