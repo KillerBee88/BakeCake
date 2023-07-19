@@ -70,9 +70,9 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True, null=True, verbose_name='Описание')),
                 ('levels', models.IntegerField(choices=[(1, '1 уровень'), (2, '2 уровня'), (3, '3 уровня')], default=1, verbose_name='Количество уровней')),
                 ('text', models.CharField(blank=True, max_length=100, null=True, verbose_name='Надпись на торте')),
-                ('berries', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='datacenter.Berries', verbose_name='Ягоды')),
-                ('shape', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='datacenter.Shape', verbose_name='Форма')),
-                ('topping', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='datacenter.Topping', verbose_name='Топпинг')),
+                ('berries', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='bot.Berries', verbose_name='Ягоды')),
+                ('shape', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bot.Shape', verbose_name='Форма')),
+                ('topping', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='bot.Topping', verbose_name='Топпинг')),
             ],
         ),
     ]

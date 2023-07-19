@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('datacenter', '0002_auto_20230719_0248'),
+        ('bot', '0002_auto_20230719_0248'),
     ]
 
     operations = [
@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
                 ('creation', models.DateTimeField(auto_now_add=True, verbose_name='Дата и время заказа')),
                 ('short_delivery_time', models.BooleanField(default=False, verbose_name='Сокращенное время доставки')),
                 ('comment', models.TextField(blank=True, null=True, verbose_name='Комментарий')),
-                ('cake', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='datacenter.Cake', verbose_name='Торт')),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='datacenter.Client', verbose_name='Клиент')),
+                ('cake', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bot.Cake', verbose_name='Торт')),
+                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='bot.Client', verbose_name='Клиент')),
             ],
         ),
     ]
