@@ -4,6 +4,7 @@ import datetime
 import re
 import requests
 
+from views import get_user_orders
 
 bot = TeleBot('6017270704:AAH9MTfQELdHSXbbCAwfPQXL-47Xnuhf0p8')
 
@@ -14,10 +15,9 @@ def main_menu(message):
     buttons = [types.InlineKeyboardButton(text='Заказать торт', callback_data='order_cake'),
                types.InlineKeyboardButton(text='Прайс-лист', callback_data='price_list'),
                types.InlineKeyboardButton(text='Мои заказы', callback_data='my_orders')]
-    for btn in buttons:
-        markup.add(btn)
-    bot.send_message(message.chat.id, 'Добро пожаловать в Главное Меню!',
-                     reply_markup=markup, protect_content=True)
+    markup.add(*buttons)
+    bot.send_message(message.chat.id, 'Добро пожаловать в Главное Меню! Время заказывать тортики!',
+                     reply_markup=markup,)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -33,7 +33,7 @@ def callback_query(call):
             bot.send_photo(call.message.chat.id, caption='Вот наше меню с ценами.', photo=file, reply_markup=markup)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'my_orders':
-        my_orders(call.message.chat.id)
+        my_orders(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'main_menu':
         main_menu(call.message)
@@ -55,13 +55,24 @@ def callback_query(call):
         markup.add(button)
         bot.send_message(call.message.chat.id, 'Здесь будет инженер-конструктор', reply_markup=markup)
         bot.delete_message(call.message.chat.id, call.message.id)
+    if call.data == 'view_order':
+        view_order()
+        bot.delete_message(call.message.chat.id, call.message.id)
 
 
-def my_orders(chat_id):
+def my_orders(message):
+
+    id_telegram = message.user.id
+    orders = get_user_orders(id_telegram=id_telegram)
     markup = types.InlineKeyboardMarkup()
+    orders_buttons = [types.InlineKeyboardButton(text=order['description'], callback_data='view_order') for order in orders]
     button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
-    markup.add(button)
-    bot.send_message(chat_id, 'Вот список твоих заказов:\n1.Торт морковный - 550 р - 17.07.23\n2.Торт "Красный бархат" - 780 р - 18.07.23', reply_markup=markup)
+    markup.add(*orders_buttons, button)
+    bot.send_message(message.chat.id, 'Список твоих последних заказов.', reply_markup=markup)
+
+
+def view_order(message):
+    pass
 
 
 def order_cake(chat_id):
@@ -71,7 +82,7 @@ def order_cake(chat_id):
     for btn in buttons:
         markup.add(btn)
     bot.send_message(chat_id, 'Отлично, давай закажем торт!',
-                     reply_markup=markup, protect_content=True)
+                     reply_markup=markup, )
 
 
 def main():
