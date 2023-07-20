@@ -30,6 +30,34 @@ def callback_query(call):
     if call.data == 'order_cake':
         order_cake(call.message.chat.id)
         bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data.startswith('level_'):
+        process_level(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data.startswith('shape_'):
+        process_shape(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data.startswith('topping_'):
+        process_topping(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data.startswith('berry_'):
+        process_berries(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data.startswith('decor_'):
+        process_decor(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data.startswith('inscription_'):
+        process_inscription(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
+
+    elif call.data == 'confirm_order':
+        confirm_order(call)
+        bot.delete_message(call.message.chat.id, call.message.id)
     
     # Добавить обработку других callback_data
 
