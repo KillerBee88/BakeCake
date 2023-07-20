@@ -5,7 +5,7 @@ from telebot import TeleBot, types
 from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
-from bot.models import Client
+from bot.models import Client, Cake
 
 bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
@@ -41,17 +41,8 @@ def callback_query(call):
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'main_menu':
         main_menu(call.message)
-    if call.data == 'prebuilt_cake':
-        markup = types.InlineKeyboardMarkup()
-        buttons = [types.InlineKeyboardButton(text='Верона', callback_data='o1'),
-                   types.InlineKeyboardButton(text='Восточный', callback_data='p2'),
-                   types.InlineKeyboardButton(text='Шоколадно-банановый', callback_data='m3'),
-                   types.InlineKeyboardButton(text='Чёрный лес', callback_data='b4'),
-                   types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')]
-        markup.add(*buttons)
-        with open('ready_cakes.jpg', 'rb+') as file:
-            bot.send_photo(call.message.chat.id, caption='Выбирай торт на свой вкус!! (Это заглушка).', photo=file,
-                           reply_markup=markup)
+    if call.data == 'choose_prebuilt_cake':
+        choose_prebuilt_cake(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'cake_constructor':
         markup = types.InlineKeyboardMarkup()
@@ -87,13 +78,21 @@ def view_order(message, order_id):
 
 def order_cake(chat_id):
     markup = types.InlineKeyboardMarkup()
-    buttons = [types.InlineKeyboardButton(text='Выбрать из готовых', callback_data='prebuilt_cake'),
+    buttons = [types.InlineKeyboardButton(text='Выбрать из готовых', callback_data='choose_prebuilt_cake'),
                types.InlineKeyboardButton(text='Собрать свой торт', callback_data='cake_constructor')]
     for btn in buttons:
         markup.add(btn)
     bot.send_message(chat_id, 'Отлично, давай закажем торт!',
                      reply_markup=markup, )
 
+
+def choose_prebuilt_cake(message):
+    original_cakes = Cake.objects.filter(is_original=True)
+    markup = types.InlineKeyboardMarkup()
+    buttons = [types.InlineKeyboardButton(text=cake.title, callback_data=f'choose_cake_text;{cake.id}') for cake in original_cakes]
+    mm_but = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
+    markup.add(*buttons, mm_but)
+    bot.send_message(message.chat.id, 'Выбирай торт на свой вкус!', reply_markup=markup)
 
 def main():
     bot.polling()
