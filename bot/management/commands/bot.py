@@ -12,8 +12,8 @@ bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
 @bot.message_handler(commands=['start'])
 def main_menu(message):
-    client = Client.objects.get_or_create(id_telegram=message.from_user.id,
-                                          name=f'{message.from_user.first_name}')[0]
+    client = Client.objects.get_or_create(id_telegram=message.from_user.id)[0]
+    client.name = f'{message.from_user.first_name}'
     client.save()
     markup = types.InlineKeyboardMarkup()
     buttons = [types.InlineKeyboardButton(text='Заказать торт', callback_data='order_cake'),
