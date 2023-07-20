@@ -41,14 +41,12 @@ def callback_query(call):
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'main_menu':
         main_menu(call.message)
+        bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'choose_prebuilt_cake':
         choose_prebuilt_cake(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'cake_constructor':
-        markup = types.InlineKeyboardMarkup()
-        button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
-        markup.add(button)
-        bot.send_message(call.message.chat.id, 'Здесь будет инженер-конструктор', reply_markup=markup)
+        pass
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data.startswith('view_order'):
         call_data = call.data.split(';')
