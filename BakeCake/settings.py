@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +26,18 @@ SECRET_KEY = '7!^00+=q*8(i+7s9_5iv1*+=d6o+ea$d)wlwb=ny*q4%x&#n1u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Надбавка за срочный заказ
+
+URGENT_ORDER_ALLOWANCE = 0.2
+
+# Минимальное время заказа
+
+MIN_PRODUCTION_TIME = timedelta(hours=8)
+
+# Лимит на количество выпекаемых в день тортов
+
+DAILY_CAKE_AMOUNT_LIMIT = 10
+
 ALLOWED_HOSTS = []
 
 
@@ -37,7 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'bot.apps.DatacenterConfig',
+    'bot.apps.botConfig',
 ]
 
 MIDDLEWARE = [

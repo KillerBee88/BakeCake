@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class DatacenterConfig(AppConfig):
+class botConfig(AppConfig):
     name = 'bot'
