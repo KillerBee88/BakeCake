@@ -173,4 +173,7 @@ class Order(models.Model):
     def __str__(self):
         return f'Заказ #{self.id}'
 
+    def price(self):
+        return 100
+
 
