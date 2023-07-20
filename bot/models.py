@@ -5,7 +5,7 @@ from BakeCake.settings import URGENT_ORDER_ALLOWANCE
 
 
 class CakeParam(models.Model):
-    title = models.CharField('Название', max_length=20)
+    title = models.CharField('Название', max_length=20) 
     price = models.DecimalField(
         'Цена',
         default=0.00,
@@ -47,33 +47,38 @@ class Decor(CakeParam):
 
 class Cake(models.Model):
     is_original = models.BooleanField('Оригинальный', default=False)
-    title = models.CharField('Название торта', max_length=50)           # только для оригинальных?
-    image = models.ImageField('Изображение', null=True, blank=True)     # только для оригинальных!
-    description = models.TextField('Описание', null=True, blank=True)   # только для оригинальных?
+    title = models.CharField(
+        'Название торта', 
+        null=True, blank=True, 
+        max_length=50)           
+    image = models.ImageField('Изображение', null=True, blank=True)     
+    description = models.TextField('Описание', null=True, blank=True)   
 
     levels = models.ForeignKey(
         Levels,
         verbose_name='Уровни',
-        default=1,
-        on_delete=models.CASCADE)  # какой on_delete лучше?
+        null=True,
+        on_delete=models.PROTECT)  
     shape = models.ForeignKey(
         Shape,
         verbose_name='Форма',
-        on_delete=models.CASCADE)  # какой on_delete лучше?
+        null=True,
+        on_delete=models.PROTECT)  
     topping = models.ForeignKey(
         Topping,
         verbose_name='Топпинг',
-        on_delete=models.CASCADE)  # какой on_delete лучше?
+        null=True,
+        on_delete=models.PROTECT)  
     berries = models.ForeignKey(
         Berries,
         verbose_name='Ягоды',
         null=True, blank=True,
-        on_delete=models.SET_NULL)  # какой on_delete лучше?
+        on_delete=models.SET_NULL)  
     topping = models.ForeignKey(
         Topping,
         verbose_name='Топпинг',
         null=True, blank=True,
-        on_delete=models.SET_NULL)  # какой on_delete лучше?
+        on_delete=models.SET_NULL)  
     text = models.CharField(
         'Надпись на торте',
         max_length=100,
@@ -84,13 +89,18 @@ class Cake(models.Model):
             return f'Торт {self.title}' 
         return f'Торт #{self.id}'
 
-
     def get_params(self):
         return [self.levels, self.shape, 
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
         return sum([param.price for param in self.get_params()])
+
+    def verify_cake(self):
+        for param in self.get_params():
+            if not param.is_available:
+                return False
+        return True
 
 
 class Client(models.Model):
