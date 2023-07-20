@@ -31,7 +31,7 @@ def callback_query(call):
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'price_list':
         markup = types.InlineKeyboardMarkup()
-        button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
+        button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu;keep_previous')
         markup.add(button)
         with open('price_list.jpg', 'rb+') as file:
             bot.send_photo(call.message.chat.id, caption='Вот наше меню с ценами.', photo=file, reply_markup=markup)
@@ -39,9 +39,10 @@ def callback_query(call):
     if call.data == 'my_orders':
         my_orders(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data == 'main_menu':
+    if call.data.startswith('main_menu'):
         main_menu(call.message)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        if 'keep_previous' not in call.data:
+            bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'choose_prebuilt_cake':
         choose_prebuilt_cake(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
