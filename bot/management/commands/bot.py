@@ -92,6 +92,7 @@ def choose_prebuilt_cake(message):
     markup.add(*buttons, mm_but)
     bot.send_message(message.chat.id, 'Выбирай торт на свой вкус!', reply_markup=markup)
 
+
 def main():
     bot.polling()
 
