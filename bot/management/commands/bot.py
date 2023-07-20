@@ -5,19 +5,23 @@ from telebot import TeleBot, types
 from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
+from bot.models import Client
 
 bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
 
 @bot.message_handler(commands=['start'])
 def main_menu(message):
+    client = Client.objects.get_or_create(id_telegram=message.from_user.id,
+                                 name=f'{message.from_user.first_name} {message.from_user.last_name}')[0]
+    client.save()
     markup = types.InlineKeyboardMarkup()
     buttons = [types.InlineKeyboardButton(text='Заказать торт', callback_data='order_cake'),
                types.InlineKeyboardButton(text='Прайс-лист', callback_data='price_list'),
                types.InlineKeyboardButton(text='Мои заказы', callback_data='my_orders')]
     markup.add(*buttons)
     bot.send_message(message.chat.id, 'Добро пожаловать в Главное Меню! Время заказывать тортики!',
-                     reply_markup=markup,)
+                     reply_markup=markup, )
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -55,17 +59,19 @@ def callback_query(call):
         markup.add(button)
         bot.send_message(call.message.chat.id, 'Здесь будет инженер-конструктор', reply_markup=markup)
         bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data[0] == 'view_order':
-        view_order(call.message, call.data[1])
+    if call.data.startswith('view_order'):
+        call_data = call.data.split(';')
+        order_id = call_data[1]
+        view_order(call.message, order_id)
         bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def my_orders(message):
-
     id_telegram = message.chat.id
     orders = get_user_orders(id_telegram=id_telegram)
     markup = types.InlineKeyboardMarkup()
-    orders_buttons = [types.InlineKeyboardButton(text=order['description'], callback_data=f'view_order_{order["id"]}') for order in orders]
+    orders_buttons = [types.InlineKeyboardButton(text=order['description'], callback_data=f'view_order;{order["id"]}')
+                      for order in orders]
     button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
     markup.add(*orders_buttons, button)
     bot.send_message(message.chat.id, 'Список твоих последних заказов.', reply_markup=markup)
