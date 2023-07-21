@@ -30,34 +30,34 @@ def callback_query(call):
     if call.data == 'order_cake':
         order_cake(call.message.chat.id)
         #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data == 'price_list':
+    elif call.data == 'price_list':
         markup = types.InlineKeyboardMarkup()
         button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu;keep_previous')
         markup.add(button)
         with open('price_list.jpg', 'rb+') as file:
             bot.send_photo(call.message.chat.id, caption='Вот наше меню с ценами.', photo=file, reply_markup=markup)
         #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data == 'my_orders':
+    elif call.data == 'my_orders':
         my_orders(call.message)
         #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data.startswith('main_menu'):
+    elif call.data.startswith('main_menu'):
         main_menu(call.message)
         if 'keep_previous' not in call.data:
             pass
             #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data == 'choose_prebuilt_cake':
+    elif call.data == 'choose_prebuilt_cake':
         choose_prebuilt_cake(call.message)
         #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data == 'cake_constructor':
+    elif call.data == 'cake_constructor':
         cake = Cake.objects.create()
         choose_level(call.message, cake)
         #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data.startswith('view_order'):
+    elif call.data.startswith('view_order'):
         call_data = call.data.split(';')
         order_id = call_data[1]
         view_order(call.message, order_id)
         #bot.delete_message(call.message.chat.id, call.message.id)
-    if call.data.startswith('choose_shape'):
+    elif call.data.startswith('choose_shape'):
         callback = call.data.split(';')
         cake_id = callback[1]
         level_id = callback[2]
@@ -65,7 +65,7 @@ def callback_query(call):
         cake.levels = Levels.objects.get(id=level_id)
         cake.save()
         choose_shape(call.message, cake)
-    if call.data.startswith('choose_topping'):
+    elif call.data.startswith('choose_topping'):
         callback = call.data.split(';')
         cake_id = callback[1]
         shape_id = callback[2]
@@ -73,7 +73,7 @@ def callback_query(call):
         cake.shape = Shape.objects.get(id=shape_id)
         cake.save()
         choose_topping(call.message, cake)
-    if call.data.startswith('choose_berries'):
+    elif call.data.startswith('choose_berries'):
         callback = call.data.split(';')
         cake_id = callback[1]
         topping_id = callback[2]
@@ -81,7 +81,7 @@ def callback_query(call):
         cake.topping = Topping.objects.get(id=topping_id)
         cake.save()
         choose_berries(call.message, cake)
-    if call.data.startswith('choose_decor'):
+    elif call.data.startswith('choose_decor'):
         callback = call.data.split(';')
         cake_id = callback[1]
         berries_id = callback[2]
@@ -89,7 +89,7 @@ def callback_query(call):
         cake.berries = Berries.objects.get(id=berries_id)
         cake.save()
         choose_decor(call.message, cake)
-    if call.data.startswith('choose_cake_text'):
+    elif call.data.startswith('choose_cake_text'):
         callback = call.data.split(';')
         cake_id = callback[1]
         decor_id = callback[2]
@@ -104,7 +104,7 @@ def callback_query(call):
         msg = bot.send_message(call.message.chat.id, 'Хочешь добавить надпись на торт? Если да, то напиши её.', reply_markup=markup)
         bot.register_next_step_handler(msg, set_cake_text, cake_id)
 
-    if call.data.startswith('create_order'):
+    elif call.data.startswith('create_order'):
         callback = call.data.split(';')
         cake_id = callback[1]
         cake = Cake.objects.get(id=cake_id)
@@ -113,12 +113,12 @@ def callback_query(call):
         msg = bot.send_message(call.message.chat.id, 'Введите адрес доставки.')
         bot.register_next_step_handler(msg, set_delivery_adress, order.id)
 
-    if call.data.startswith('get_delivery_datetime'):
+    elif call.data.startswith('get_delivery_datetime'):
         callback = call.data.split(';')
         order_id = callback[1]
         get_order_date(call.message, order_id)
 
-    if call.data.startswith('set_date'):
+    elif call.data.startswith('set_date'):
         callback = call.data.split(';')
         order_id = callback[1]
         date_str = callback[2]
@@ -128,7 +128,7 @@ def callback_query(call):
         order.save()
         get_order_time(call.message, order_id, date_str)
 
-    if call.data.startswith('set_time'):
+    elif call.data.startswith('set_time'):
         callback = call.data.split(';')
         order_id = callback[1]
         date_str = callback[2]
@@ -138,13 +138,13 @@ def callback_query(call):
         order.save()
         accept_order(call.message, order_id)
 
-    if call.data.startswith('accept_order'):
+    elif call.data.startswith('accept_order'):
         markup = types.InlineKeyboardMarkup()
         button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
         markup.add(button)
         bot.send_message(call.message.chat.id, f'Ожидайте доставку вашего тортика!', reply_markup=markup)
 
-    if call.data.startswith('cancel_order'):
+    elif call.data.startswith('cancel_order'):
         callback = call.data.split(';')
         order_id = callback[1]
         Order.objects.get(id=order_id).delete()
