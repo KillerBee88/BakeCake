@@ -1,7 +1,8 @@
 from django.db import models
 from datetime import timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
-from BakeCake.settings import URGENT_ORDER_ALLOWANCE
+from BakeCake.settings import URGENT_ORDER_ALLOWANCE, BITLY_TOKEN
+from bot.bitlink import shorten_link, count_clicks
 
 
 class CakeParam(models.Model):
@@ -48,8 +49,8 @@ class Decor(CakeParam):
 class Cake(models.Model):
     is_original = models.BooleanField('Оригинальный', default=False)
     title = models.CharField(
-        'Название торта', 
-        null=True, blank=True, 
+        'Название торта',
+        null=True, blank=True,
         max_length=50)           
     image = models.ImageField('Изображение', null=True, blank=True)     
     description = models.TextField('Описание', null=True, blank=True)   
@@ -86,11 +87,11 @@ class Cake(models.Model):
 
     def __str__(self):
         if self.title:
-            return f'Торт {self.title}' 
+            return f'Торт {self.title}'
         return f'Торт #{self.id}'
 
     def get_params(self):
-        return [self.levels, self.shape, 
+        return [self.levels, self.shape,
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
@@ -154,7 +155,7 @@ class Order(models.Model):
         on_delete=models.SET_NULL)
     comment = models.TextField('Комментарий', null=True, blank=True)
     complaint = models.OneToOneField(
-        Complaint, 
+        Complaint,
         on_delete=models.SET_NULL,
         null=True, blank=True)
     # status
@@ -177,3 +178,17 @@ class Order(models.Model):
         return 100
 
 
+class Link(models.Model):
+    url = models.CharField('Адрес', unique=True, max_length=100)
+
+    def __get_shorten_link(self):
+        return shorten_link(BITLY_TOKEN, self.url)
+
+    shorten_link = models.CharField(
+        'Сокращенная ссылка',
+        max_length=30,
+        default=__get_shorten_link)
+
+    @property
+    def clicks(self):
+        return count_clicks(BITLY_TOKEN, self.shorten_link)
