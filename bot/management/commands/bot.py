@@ -5,7 +5,7 @@ from telebot import TeleBot, types
 from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
-from bot.models import Client, Cake
+from bot.models import Client, Cake, Levels
 
 bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
@@ -47,7 +47,8 @@ def callback_query(call):
         choose_prebuilt_cake(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'cake_constructor':
-
+        cake = Cake.objects.create()
+        choose_level(call.message, cake)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data.startswith('view_order'):
         call_data = call.data.split(';')
@@ -55,6 +56,13 @@ def callback_query(call):
         view_order(call.message, order_id)
         bot.delete_message(call.message.chat.id, call.message.id)
 
+
+def choose_level(message, cake):
+    levels = Levels.objects.filter(is_available=True)
+    buttons = [types.InlineKeyboardButton(text=level.text, callback_data=f'choose_shape;{cake.id};{level.id}') for level in levels]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+    bot.send_message(message.chat.id, 'Выбери количество уровней.', reply_markup=markup)
 
 def my_orders(message):
     id_telegram = message.chat.id
