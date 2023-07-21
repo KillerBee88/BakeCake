@@ -5,7 +5,7 @@ from telebot import TeleBot, types
 from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
-from bot.models import Client, Cake, Levels, Shape
+from bot.models import Client, Cake, Levels, Shape, Topping, Berries
 
 bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
@@ -63,6 +63,30 @@ def callback_query(call):
         cake.level = Levels.objects.get(id=level_id)
         cake.save()
         choose_shape(call.message, cake)
+    if call.data.startswith('choose_topping'):
+        callback = call.data.split(';')
+        cake_id = callback[1]
+        shape_id = callback[2]
+        cake = Cake.objects.get(id=cake_id)
+        cake.shape = Shape.objects.get(id=shape_id)
+        cake.save()
+        choose_topping(call.message, cake)
+    if call.data.startswith('choose_berries'):
+        callback = call.data.split(';')
+        cake_id = callback[1]
+        topping_id = callback[2]
+        cake = Cake.objects.get(id=cake_id)
+        cake.topping = Topping.objects.get(id=topping_id)
+        cake.save()
+        choose_berries(call.message, cake)
+    if call.data.startswith('choose_decor'):
+        callback = call.data.split(';')
+        cake_id = callback[1]
+        berries_id = callback[2]
+        cake = Cake.objects.get(id=cake_id)
+        cake.topping = Berries.objects.get(id=berries_id)
+        cake.save()
+        choose_decor(call.message, cake)
 
 
 def choose_level(message, cake):
@@ -79,6 +103,23 @@ def choose_shape(message, cake):
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
     bot.send_message(message.chat.id, 'Выбери форму торта.', reply_markup=markup)
+
+
+def choose_topping(message, cake):
+    toppings = Topping.objects.filter(is_available=True)
+    buttons = [types.InlineKeyboardButton(text=topping.title, callback_data=f'choose_berries;{cake.id};{topping.id}') for topping in toppings]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+    bot.send_message(message.chat.id, 'Выбери топпинг.', reply_markup=markup)
+
+
+def choose_berries(message, cake):
+    berries = Berries.objects.filter(is_available=True)
+    buttons = [types.InlineKeyboardButton(text=berry.title, callback_data=f'choose_decor;{cake.id};{berry.id}') for berry in berries]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+    bot.send_message(message.chat.id, 'Выбери ягоды.', reply_markup=markup)
+
 
 def my_orders(message):
     id_telegram = message.chat.id
