@@ -174,6 +174,9 @@ class Order(models.Model):
     def __str__(self):
         return f'Заказ #{self.id}'
 
+    def price(self):
+        return 100
+
 
 class Link(models.Model):
     url = models.CharField('Адрес', unique=True, max_length=100)
