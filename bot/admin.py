@@ -1,5 +1,5 @@
 from django.contrib import admin
-from bot.models import Client, Order, Cake, Levels, Shape, Topping, Berries, Decor
+from bot.models import Client, Order, Cake, Level, Shape, Topping, Berries, Decor
 
 
 class ClientOrdersInline(admin.TabularInline):
@@ -15,7 +15,7 @@ class ClientAdmin(admin.ModelAdmin):
 
 admin.site.register(Order)
 admin.site.register(Cake)
-admin.site.register(Levels)
+admin.site.register(Level)
 admin.site.register(Shape)
 admin.site.register(Topping)
 admin.site.register(Berries)

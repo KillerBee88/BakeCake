@@ -7,8 +7,9 @@ from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
 from bot.models import Client, Cake, Levels, Shape, Topping, Berries, Decor, Order
+from BakeCake.settings import TELEGRAM_TOKEN
 
-bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
+bot = TeleBot(TELEGRAM_TOKEN)
 
 
 @bot.message_handler(commands=['start'])

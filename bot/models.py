@@ -1,8 +1,9 @@
 from django.db import models
 from datetime import timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
-from BakeCake.settings import URGENT_ORDER_ALLOWANCE, BITLY_TOKEN
-from bot.bitlink import shorten_link, count_clicks
+from django.db.models import Max
+from BakeCake.settings import URGENT_ORDER_ALLOWANCE, BOT_LINK
+from bot.bitlink import is_bitlink, shorten_link, count_clicks
 
 
 class CakeParam(models.Model):
@@ -17,7 +18,7 @@ class CakeParam(models.Model):
         abstract = True
 
 
-class Levels(CakeParam):
+class Level(CakeParam):
     LEVEL_CHOICES = [
         (1, '1 уровень'),
         (2, '2 уровня'),
@@ -55,8 +56,8 @@ class Cake(models.Model):
     image = models.ImageField('Изображение', null=True, blank=True)     
     description = models.TextField('Описание', null=True, blank=True)   
 
-    levels = models.ForeignKey(
-        Levels,
+    level = models.ForeignKey(
+        Level,
         verbose_name='Уровни',
         null=True,
         on_delete=models.PROTECT)  
@@ -91,7 +92,7 @@ class Cake(models.Model):
         return f'Торт #{self.id}'
 
     def get_params(self):
-        return [self.levels, self.shape,
+        return [self.level, self.shape,
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
@@ -174,21 +175,28 @@ class Order(models.Model):
     def __str__(self):
         return f'Заказ #{self.id}'
 
-    def price(self):
-        return 100
+
+def create_new_bitlink():
+    next_bitlink_id = Link.objects.aggregate(Max('id'))['id__max'] + 1
+    while True:
+        if not is_bitlink(BOT_LINK, next_bitlink_id):
+            return shorten_link(BOT_LINK, next_bitlink_id)
+        next_bitlink_id += 1
+
 
 
 class Link(models.Model):
-    url = models.CharField('Адрес', unique=True, max_length=100)
-
-    def __get_shorten_link(self):
-        return shorten_link(BITLY_TOKEN, self.url)
-
     shorten_link = models.CharField(
         'Сокращенная ссылка',
-        max_length=30,
-        default=__get_shorten_link)
+        max_length=20,
+        null=True, blank=True,
+        default=create_new_bitlink)
+    place_of_use = models.CharField(
+        'Место использования ссылки',
+        max_length=50,
+        null=True, blank=True)
 
     @property
     def clicks(self):
-        return count_clicks(BITLY_TOKEN, self.shorten_link)
+        return count_clicks(self.shorten_link)
+
