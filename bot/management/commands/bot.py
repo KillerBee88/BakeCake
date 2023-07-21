@@ -95,6 +95,11 @@ def callback_query(call):
         cake = Cake.objects.get(id=cake_id)
         request_cake_text(call.message, cake)
 
+    elif call.data.startswith('no_cake_text'):
+        bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
+        cake_id = callback_data[1]
+        set_cake_text(call.message, '', cake_id)
+
     elif call.data.startswith('create_order'):
         cake_id = callback_data[1]
         cake = Cake.objects.get(id=cake_id)
@@ -142,12 +147,12 @@ def callback_query(call):
 
 
 def request_cake_text(message, cake):
-    button = types.InlineKeyboardButton(text='Без надписи', callback_data=f'create_order;{cake.id};')
+    button = types.InlineKeyboardButton(text='Без надписи', callback_data=f'no_cake_text;{cake.id};')
     markup = types.InlineKeyboardMarkup()
     markup.add(button)
     msg = bot.send_message(message.chat.id, 'Хочешь добавить надпись на торт? Если да, то напиши её.',
                            reply_markup=markup)
-    bot.register_next_step_handler(msg, set_cake_text, cake.id)
+    bot.register_next_step_handler(msg, set_cake_text, msg.text, cake.id)
 
 
 def send_price_list(message):
@@ -200,7 +205,7 @@ def get_order_date(message, order_id):
 
 
 def set_delivery_address(message, order):
-    order.text = message.text
+    order.comment = message.text
     order.save()
 
     buttons = [types.InlineKeyboardButton(text='Да', callback_data=f'get_delivery_datetime;{order.id};'),
@@ -211,9 +216,9 @@ def set_delivery_address(message, order):
     bot.send_message(message.chat.id, f'Вы согласны на обработку персональных данных?', reply_markup=markup)
 
 
-def set_cake_text(message, cake_id):
+def set_cake_text(message, msg_text, cake_id):
     cake = Cake.objects.get(id=cake_id)
-    cake.text = message.text
+    cake.text = msg_text
     cake.save()
 
     buttons = [types.InlineKeyboardButton(text='Оформить заказ', callback_data=f'create_order;{cake_id};'),

@@ -181,13 +181,13 @@ class Order(models.Model):
 class Link(models.Model):
     url = models.CharField('Адрес', unique=True, max_length=100)
 
-    def __get_shorten_link(self):
+    def get_shorten_link(self):
         return shorten_link(BITLY_TOKEN, self.url)
 
     shorten_link = models.CharField(
         'Сокращенная ссылка',
         max_length=30,
-        default=__get_shorten_link)
+        default=get_shorten_link)
 
     @property
     def clicks(self):
