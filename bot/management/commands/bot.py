@@ -101,7 +101,7 @@ def callback_query(call):
         user = Client.objects.get(id_telegram=call.message.chat.id)
         order = Order.objects.create(cake=cake, client=user)
         msg = bot.send_message(call.message.chat.id, 'Введите адрес доставки.')
-        bot.register_next_step_handler(msg, set_delivery_adress, order.id)
+        bot.register_next_step_handler(msg, set_delivery_address, order)
 
     elif call.data.startswith('get_delivery_datetime'):
         order_id = callback_data[1]
@@ -199,12 +199,11 @@ def get_order_date(message, order_id):
                      reply_markup=markup)
 
 
-def set_delivery_adress(message, order_id):
-    order = Order.objects.get(id=order_id)
+def set_delivery_address(message, order):
     order.text = message.text
     order.save()
 
-    buttons = [types.InlineKeyboardButton(text='Да', callback_data=f'get_delivery_datetime;{order_id};'),
+    buttons = [types.InlineKeyboardButton(text='Да', callback_data=f'get_delivery_datetime;{order.id};'),
                types.InlineKeyboardButton(text='Нет', callback_data=f'main_menu;')]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
