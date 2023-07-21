@@ -43,7 +43,8 @@ def callback_query(call):
     if call.data.startswith('main_menu'):
         main_menu(call.message)
         if 'keep_previous' not in call.data:
-            bot.delete_message(call.message.chat.id, call.message.id)
+            pass
+            #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'choose_prebuilt_cake':
         choose_prebuilt_cake(call.message)
         #bot.delete_message(call.message.chat.id, call.message.id)
@@ -107,7 +108,7 @@ def callback_query(call):
         callback = call.data.split(';')
         cake_id = callback[1]
         cake = Cake.objects.get(id=cake_id)
-        user = Client.objects.get(id_telegram=call.message.from_user.id)
+        user = Client.objects.get(id_telegram=call.message.chat.id)
         order = Order.objects.create(cake=cake, client=user)
         msg = bot.send_message(call.message.chat.id, 'Введите адрес доставки.')
         bot.register_next_step_handler(msg, set_delivery_adress, order.id)
