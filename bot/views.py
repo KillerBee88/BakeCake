@@ -10,7 +10,7 @@ def get_user_orders(id_telegram: int or str):
     for order in user.orders.all()[:5]:
         orders.append(
             {
-                'description': f'Заказ №{order.id} от {order.creation.strftime("%d.%m.%y")}',
+                'description': f'Заказ №{order.id} от {order.order_dt.strftime("%d.%m.%y")}',
                 'id': order.id,
             }
         )
@@ -20,11 +20,11 @@ def get_user_orders(id_telegram: int or str):
 def get_serialized_order(order_id):
     order = get_object_or_404(Order, id=order_id)
     return {
-        'description': f'Заказ №{order.id} от {order.creation.strftime("%d.%m.%y")}',
+        'description': f'Заказ №{order.id} от {order.order_dt.strftime("%d.%m.%y")}',
         'id': order.id,
         'cake': order.cake,
-        'creation_date': order.creation,
-        'delivery_date': order.delivery_date,
+        'creation_date': order.order_dt,
+        'delivery_date': order.delivery_dt,
         'comment': order.comment,
         'price': order.price()
     }

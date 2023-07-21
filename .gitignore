@@ -137,4 +137,4 @@ cython_debug/
 .idea/
 
 */tests.py
-bot/migrations/*.py
+bot/migrations
