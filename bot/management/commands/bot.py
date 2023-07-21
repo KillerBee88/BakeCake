@@ -1,11 +1,12 @@
 import os
 import time
+from datetime import datetime, timedelta
 
 from telebot import TeleBot, types
 from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
-from bot.models import Client, Cake, Levels, Shape, Topping, Berries, Decor
+from bot.models import Client, Cake, Levels, Shape, Topping, Berries, Decor, Order
 
 bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
@@ -28,33 +29,33 @@ def main_menu(message):
 def callback_query(call):
     if call.data == 'order_cake':
         order_cake(call.message.chat.id)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'price_list':
         markup = types.InlineKeyboardMarkup()
         button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu;keep_previous')
         markup.add(button)
         with open('price_list.jpg', 'rb+') as file:
             bot.send_photo(call.message.chat.id, caption='Вот наше меню с ценами.', photo=file, reply_markup=markup)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'my_orders':
         my_orders(call.message)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data.startswith('main_menu'):
         main_menu(call.message)
         if 'keep_previous' not in call.data:
             bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'choose_prebuilt_cake':
         choose_prebuilt_cake(call.message)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'cake_constructor':
         cake = Cake.objects.create()
         choose_level(call.message, cake)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data.startswith('view_order'):
         call_data = call.data.split(';')
         order_id = call_data[1]
         view_order(call.message, order_id)
-        bot.delete_message(call.message.chat.id, call.message.id)
+        #bot.delete_message(call.message.chat.id, call.message.id)
     if call.data.startswith('choose_shape'):
         callback = call.data.split(';')
         cake_id = callback[1]
@@ -95,19 +96,128 @@ def callback_query(call):
             cake = Cake.objects.get(id=cake_id)
             cake.decor = Decor.objects.get(id=decor_id)
             cake.save()
-        bot.set_state(call.message.from_user.id, 'choose_cake_text')
-        buttons = [types.InlineKeyboardButton(text='Без надписи', callback_data=f'promocode;{cake_id};')]
+        #bot.set_state(call.message.from_user.id, 'choose_cake_text')
+        buttons = [types.InlineKeyboardButton(text='Без надписи', callback_data=f'create_order;{cake_id};')]
         markup = types.InlineKeyboardMarkup()
         markup.add(*buttons)
         msg = bot.send_message(call.message.chat.id, 'Хочешь добавить надпись на торт? Если да, то напиши её.', reply_markup=markup)
         bot.register_next_step_handler(msg, set_cake_text, cake_id)
+
+    if call.data.startswith('create_order'):
+        callback = call.data.split(';')
+        cake_id = callback[1]
+        cake = Cake.objects.get(id=cake_id)
+        user = Client.objects.get(id_telegram=call.message.from_user.id)
+        order = Order.objects.create(cake=cake, client=user)
+        msg = bot.send_message(call.message.chat.id, 'Введите адрес доставки.')
+        bot.register_next_step_handler(msg, set_delivery_adress, order.id)
+
+    if call.data.startswith('get_delivery_datetime'):
+        callback = call.data.split(';')
+        order_id = callback[1]
+        get_order_date(call.message, order_id)
+
+    if call.data.startswith('set_date'):
+        callback = call.data.split(';')
+        order_id = callback[1]
+        date_str = callback[2]
+        date = datetime.strptime(date_str, "%d.%m.%Y")
+        order = Order.objects.get(id=order_id)
+        order.delivery_dt = date
+        order.save()
+        get_order_time(call.message, order_id, date_str)
+
+    if call.data.startswith('set_time'):
+        callback = call.data.split(';')
+        order_id = callback[1]
+        date_str = callback[2]
+        date = datetime.strptime(date_str, "%d.%m.%Y_%H:%M")
+        order = Order.objects.get(id=order_id)
+        order.delivery_dt = date
+        order.save()
+        accept_order(call.message, order_id)
+
+    if call.data.startswith('accept_order'):
+        markup = types.InlineKeyboardMarkup()
+        button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
+        markup.add(button)
+        bot.send_message(call.message.chat.id, f'Ожидайте доставку вашего тортика!', reply_markup=markup)
+
+    if call.data.startswith('cancel_order'):
+        callback = call.data.split(';')
+        order_id = callback[1]
+        Order.objects.get(id=order_id).delete()
+        markup = types.InlineKeyboardMarkup()
+        button = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
+        markup.add(button)
+        bot.send_message(call.message.chat.id, f'Заказ отменён.', reply_markup=markup)
+
+def accept_order(message, order_id):
+    order = Order.objects.get(id=order_id)
+    order.text = message.text
+    order.save()
+
+    buttons = [types.InlineKeyboardButton(text='Да', callback_data=f'accept_order;{order_id};'),
+               types.InlineKeyboardButton(text='Нет', callback_data=f'cancel_order;{order_id};')]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+
+    bot.send_message(message.chat.id, f'Вот ваш заказ:\n{order}\nПодтверждаете заказ?', reply_markup=markup)
+
+
+def get_order_time(message, order_id, date_str):
+    base = datetime.strptime(f'{date_str}_10.00', '%d.%m.%Y_%H.%M')
+    time_list = [base + timedelta(hours=x) for x in range(8)]
+
+    buttons = [types.InlineKeyboardButton(text=f'{date.strftime("%H:%M")}',
+                                          callback_data=f'set_time;{order_id};{date.strftime("%d.%m.%Y_%H:%M")};') for date in
+               time_list]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+
+    bot.send_message(message.chat.id,
+                     'Выберите время доставки.',
+                     reply_markup=markup)
+
+
+def get_order_date(message, order_id):
+    base = datetime.today()
+    date_list = [base + timedelta(days=x) for x in range(1, 6)]
+
+    buttons = [types.InlineKeyboardButton(text=f'{date.strftime("%d.%m")}', callback_data=f'set_date;{order_id};{date.strftime("%d.%m.%Y")};') for date in date_list]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+
+    bot.send_message(message.chat.id,
+                     'Выберите дату доставки. Доставка осуществляется на следующий день и позднее. При выборе доставки на следующий день, стоимость заказа увеличивается на 20%.',
+                     reply_markup=markup)
+
+
+def set_delivery_adress(message, order_id):
+    order = Order.objects.get(id=order_id)
+    order.text = message.text
+    order.save()
+
+    buttons = [types.InlineKeyboardButton(text='Да', callback_data=f'get_delivery_datetime;{order_id};'),
+               types.InlineKeyboardButton(text='Нет', callback_data=f'main_menu')]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+
+    bot.send_message(message.chat.id, f'Вы согласны на обработку персональных данных?', reply_markup=markup)
 
 
 def set_cake_text(message, cake_id):
     cake = Cake.objects.get(id=cake_id)
     cake.text = message.text
     cake.save()
-    bot.send_message(message.chat.id, cake.text)
+
+    buttons = [types.InlineKeyboardButton(text='Оформить заказ', callback_data=f'create_order;{cake_id};'),
+               types.InlineKeyboardButton(text='Создать торт заново', callback_data=f'order_cake')]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+
+    bot.send_message(message.chat.id, f'Вот какой торт получился:\n{cake}', reply_markup=markup)
+
 
 def choose_level(message, cake):
     levels = Levels.objects.filter(is_available=True)
