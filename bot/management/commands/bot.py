@@ -5,7 +5,7 @@ from telebot import TeleBot, types
 from django.core.management.base import BaseCommand
 
 from bot.views import get_user_orders, get_serialized_order
-from bot.models import Client, Cake, Levels, Shape, Topping, Berries
+from bot.models import Client, Cake, Levels, Shape, Topping, Berries, Decor
 
 bot = TeleBot('5969598197:AAHdFTkY8adzmcP3OgVig0pDLiQ8r61mOts')
 
@@ -87,6 +87,15 @@ def callback_query(call):
         cake.topping = Berries.objects.get(id=berries_id)
         cake.save()
         choose_decor(call.message, cake)
+    if call.data.startswith('choose_cake_text'):
+        callback = call.data.split(';')
+        cake_id = callback[1]
+        decor_id = callback[2]
+        if decor_id:
+            cake = Cake.objects.get(id=cake_id)
+            cake.decor = Decor.objects.get(id=decor_id)
+            cake.save()
+
 
 
 def choose_level(message, cake):
@@ -119,6 +128,14 @@ def choose_berries(message, cake):
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
     bot.send_message(message.chat.id, 'Выбери ягоды.', reply_markup=markup)
+
+
+def choose_decor(message, cake):
+    decors = Decor.objects.filter(is_available=True)
+    buttons = [types.InlineKeyboardButton(text=decor.title, callback_data=f'choose_cake_text;{cake.id};{decor.id}') for decor in decors]
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons)
+    bot.send_message(message.chat.id, 'Выбери декор.', reply_markup=markup)
 
 
 def my_orders(message):
@@ -154,7 +171,7 @@ def order_cake(chat_id):
 def choose_prebuilt_cake(message):
     original_cakes = Cake.objects.filter(is_original=True)
     markup = types.InlineKeyboardMarkup()
-    buttons = [types.InlineKeyboardButton(text=cake.title, callback_data=f'choose_cake_text;{cake.id}') for cake in original_cakes]
+    buttons = [types.InlineKeyboardButton(text=cake.title, callback_data=f'choose_cake_text;{cake.id};') for cake in original_cakes]
     mm_but = types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')
     markup.add(*buttons, mm_but)
     bot.send_message(message.chat.id, 'Выбирай торт на свой вкус!', reply_markup=markup)
