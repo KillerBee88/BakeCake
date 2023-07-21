@@ -47,7 +47,7 @@ def callback_query(call):
         choose_prebuilt_cake(call.message)
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data == 'cake_constructor':
-        pass
+
         bot.delete_message(call.message.chat.id, call.message.id)
     if call.data.startswith('view_order'):
         call_data = call.data.split(';')
@@ -78,7 +78,8 @@ def view_order(message, order_id):
 def order_cake(chat_id):
     markup = types.InlineKeyboardMarkup()
     buttons = [types.InlineKeyboardButton(text='Выбрать из готовых', callback_data='choose_prebuilt_cake'),
-               types.InlineKeyboardButton(text='Собрать свой торт', callback_data='cake_constructor')]
+               types.InlineKeyboardButton(text='Собрать свой торт', callback_data='cake_constructor'),
+               types.InlineKeyboardButton(text='В Главное Меню', callback_data='main_menu')]
     for btn in buttons:
         markup.add(btn)
     bot.send_message(chat_id, 'Отлично, давай закажем торт!',
