@@ -60,7 +60,7 @@ def callback_query(call):
         cake_id = callback[1]
         level_id = callback[2]
         cake = Cake.objects.get(id=cake_id)
-        cake.level = Levels.objects.get(id=level_id)
+        cake.levels = Levels.objects.get(id=level_id)
         cake.save()
         choose_shape(call.message, cake)
     if call.data.startswith('choose_topping'):
@@ -84,7 +84,7 @@ def callback_query(call):
         cake_id = callback[1]
         berries_id = callback[2]
         cake = Cake.objects.get(id=cake_id)
-        cake.topping = Berries.objects.get(id=berries_id)
+        cake.berries = Berries.objects.get(id=berries_id)
         cake.save()
         choose_decor(call.message, cake)
     if call.data.startswith('choose_cake_text'):
@@ -95,8 +95,19 @@ def callback_query(call):
             cake = Cake.objects.get(id=cake_id)
             cake.decor = Decor.objects.get(id=decor_id)
             cake.save()
+        bot.set_state(call.message.from_user.id, 'choose_cake_text')
+        buttons = [types.InlineKeyboardButton(text='Без надписи', callback_data=f'promocode;{cake_id};')]
+        markup = types.InlineKeyboardMarkup()
+        markup.add(*buttons)
+        msg = bot.send_message(call.message.chat.id, 'Хочешь добавить надпись на торт? Если да, то напиши её.', reply_markup=markup)
+        bot.register_next_step_handler(msg, set_cake_text, cake_id)
 
 
+def set_cake_text(message, cake_id):
+    cake = Cake.objects.get(id=cake_id)
+    cake.text = message.text
+    cake.save()
+    bot.send_message(message.chat.id, cake.text)
 
 def choose_level(message, cake):
     levels = Levels.objects.filter(is_available=True)
