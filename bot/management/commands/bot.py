@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from telebot import TeleBot, types
 
+import BakeCake.settings
 from bot.views import get_user_orders, get_serialized_order
 from bot.models import Client, Cake, Levels, Shape
 from bot.models import Topping, Berries, Decor, Order
@@ -139,11 +140,14 @@ def callback_query(call):
         accept_order(call.message, order_id)
 
     elif call.data.startswith('accept_order'):
+        order_id = callback_data[1]
+        order = Order.objects.get(id=order_id)
         markup = types.InlineKeyboardMarkup()
         button = types.InlineKeyboardButton(text='В Главное Меню',
                                             callback_data='main_menu;')
         markup.add(button)
-        # TODO: Добавить отправку нового заказа в ТГ-канал админа
+        # TODO: Убрать магическое число
+        bot.send_message(-1001854282629, order)
         bot.send_message(call.message.chat.id,
                          'Ожидайте доставку вашего тортика!',
                          reply_markup=markup)
