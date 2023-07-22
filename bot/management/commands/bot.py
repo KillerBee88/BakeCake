@@ -144,7 +144,8 @@ def callback_query(call):
         order = Order.objects.get(id=order_id)
         order.delivery_dt = date
         order.save()
-        accept_order(call.message, order_id)
+        comment_order(call.message, order)
+
 
     elif call.data.startswith('accept_order'):
         order_id = callback_data[1]
@@ -153,11 +154,12 @@ def callback_query(call):
         button = types.InlineKeyboardButton(text='В Главное Меню',
                                             callback_data='main_menu;')
         markup.add(button)
-        # TODO: Убрать магическое число
+
         markup2 = types.InlineKeyboardMarkup()
         button2 = types.InlineKeyboardButton(text='Написать заказчику', url=f'tg://user?id={call.message.chat.id}')
         markup2.add(button2)
         bot.send_message(-1001854282629, order, reply_markup=markup2)
+
         bot.send_message(call.message.chat.id,
                          'Ожидайте доставку вашего тортика!',
                          reply_markup=markup)
@@ -172,6 +174,28 @@ def callback_query(call):
         bot.send_message(call.message.chat.id,
                          'Заказ отменён.',
                          reply_markup=markup)
+
+    elif call.data.startswith('no_comment_order'):
+        order_id = callback_data[1]
+        order = Order.objects.get(id=order_id)
+        set_order_comment(call.message, 'Без комментариев', order)
+
+def comment_order(message, order):
+    button = types.InlineKeyboardButton(text='Без комментариев',
+                                        callback_data=f'no_comment_order;{order.id};')
+    markup = types.InlineKeyboardMarkup()
+    markup.add(button)
+    msg = bot.send_message(message.chat.id,
+                           'Хочешь добавить комментарий к заказу? Если да, то напиши его.',
+                           reply_markup=markup)
+    bot.register_next_step_handler(msg, set_order_comment, msg.text, order)
+
+
+def set_order_comment(message, text, order):
+    order.comment = text
+    order.save()
+
+    accept_order(message, order.id)
 
 
 def request_cake_text(message, cake):
