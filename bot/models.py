@@ -182,7 +182,7 @@ class Order(models.Model):
         return  delta < timedelta(days=1)
 
     def get_price(self):
-        cake_price = self.cake.get_params()
+        cake_price = self.cake.get_price()
         order_price = cake_price * \
                       (1 - self.promo_code.discount) * \
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
