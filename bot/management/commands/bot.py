@@ -17,6 +17,7 @@ bot = TeleBot(TELEGRAM_TOKEN)
 def main_menu(message):
     client = Client.objects.get_or_create(id_telegram=message.from_user.id)[0]
     client.name = f'{message.from_user.first_name}'
+    client.nickname = message.from_user.username
     client.save()
     markup = types.InlineKeyboardMarkup()
     buttons = [types.InlineKeyboardButton(text='Заказать торт',
@@ -158,7 +159,7 @@ def callback_query(call):
         markup2 = types.InlineKeyboardMarkup()
         button2 = types.InlineKeyboardButton(text='Написать заказчику', url=f'tg://user?id={call.message.chat.id}')
         markup2.add(button2)
-        bot.send_message(-1001854282629, order, reply_markup=markup2)
+        bot.send_message(-1001854282629, order.get_description(), reply_markup=markup2)
 
         bot.send_message(call.message.chat.id,
                          'Ожидайте доставку вашего тортика!',

@@ -147,11 +147,19 @@ class Cake(models.Model):
 class Client(models.Model):
     id_telegram = models.CharField('Телеграм id', max_length=20)
     name = models.CharField('Имя', max_length=30, default='Дорогой Гость')
-    address = models.CharField('Адрес', max_length=80, null=True, blank=True)
+    telegram_url = models.URLField('Ссылка на телеграм', max_length=80, null=True, blank=True,)
     consent_to_pdProc = models.BooleanField(
         'Согласие на обработку ПД',
         default=False)
-    
+    nickname = models.CharField('Ник в телеграме', max_length=30, null=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.telegram_url = self.get_tg_link()
+
+    def get_tg_link(self):
+        return f'https://t.me/{self.nickname}'
+
     class Meta:
         verbose_name_plural = 'Клиенты'
 
@@ -217,7 +225,7 @@ class Order(models.Model):
     def get_price(self):
         cake_price = self.cake.get_params()
         order_price = cake_price * \
-                      (1 - self.promo_code.discount) * \
+                      (1 - self.promo_code.discount if self.promo_code else 0.0) * \
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
         return f'{round(order_price, 2)} руб.'
 

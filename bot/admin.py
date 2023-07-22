@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from bot.models import (Client, Order, Cake, Level, Shape, Topping, Berries,
                         Decor, Complaint, PromoCode, Link)
 
@@ -7,7 +8,7 @@ class CakeParamAdmin(admin.ModelAdmin):
     list_display = ['title', 'price', 'is_available']
     list_filter = ['is_available']
     list_editable = ['is_available']
-    search_fields = ['title']
+    #search_fields = ['title']
     ordering = ['title']
 
 
@@ -59,10 +60,14 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ['name', 'id_telegram', 'address', 'consent_to_pdProc']
+    list_display = ['name', 'id_telegram', 'telegram_link', 'consent_to_pdProc']
     list_filter = ['consent_to_pdProc']
     search_fields = ['name', 'id_telegram']
+    readonly_fields = ['name', 'id_telegram', 'telegram_link', 'consent_to_pdProc', 'telegram_url', 'nickname']
     inlines = [ClientOrdersInline]
+
+    def telegram_link(self, obj):
+        return format_html("<a href='{url}'>{url}</a>", url=obj.telegram_url)
 
 
 @admin.register(Link)
