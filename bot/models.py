@@ -76,9 +76,9 @@ class Cake(models.Model):
         verbose_name='Ягоды',
         null=True, blank=True,
         on_delete=models.SET_NULL)  
-    topping = models.ForeignKey(
-        Topping,
-        verbose_name='Топпинг',
+    decor = models.ForeignKey(
+        Decor,
+        verbose_name='Декор',
         null=True, blank=True,
         on_delete=models.SET_NULL)  
     text = models.CharField(
@@ -97,6 +97,16 @@ class Cake(models.Model):
 
     def get_price(self):
         return sum([param.price for param in self.get_params()])
+
+    def get_composition(self):
+        return f'{self.__str__()}\n' \
+               'Состав:\n'\
+               f'Количество уровней: {self.level.title}\n' \
+               f'Форма коржей: {self.shape.title}\n' \
+               f'Топпинг: {self.topping.title}\n' \
+               f'Ягоды: {self.berries.title}\n' \
+               f'Декор: {self.decor.title}\n' \
+               f'Надпись на торте: {self.text}\n' 
 
     def verify_cake(self):
         for param in self.get_params():
@@ -197,7 +207,7 @@ class Link(models.Model):
         'Место использования ссылки',
         max_length=50,
         null=True, blank=True)
-    
+
     @property
     def clicks(self):
         return count_clicks(self.shorten_link)
