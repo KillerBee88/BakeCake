@@ -1,30 +1,34 @@
 from django.contrib import admin
-from .models import Cake, Order, Client, Levels, Shape, Topping, Berries, Decor
+from bot.models import (Client, Order, Cake, Level, Shape, Topping, Berries,
+                        Decor, Complaint, PromoCode, Link)
+
 
 class CakeParamAdmin(admin.ModelAdmin):
     list_display = ['title', 'price', 'is_available']
     list_filter = ['is_available']
     search_fields = ['title']
     ordering = ['title']
-from bot.models import (Client, Order, Cake, Level, Shape, Topping, Berries,
-                        Decor, Complaint, PromoCode, Link)
 
 
 class ClientOrdersInline(admin.TabularInline):
     model = Order
     fields = ['id', 'cake']
 
+
 @admin.register(Shape)
 class ShapeAdmin(CakeParamAdmin):
     pass
+
 
 @admin.register(Topping)
 class ToppingAdmin(CakeParamAdmin):
     pass
 
+
 @admin.register(Berries)
 class BerriesAdmin(CakeParamAdmin):
     pass
+
 
 @admin.register(Decor)
 class DecorAdmin(CakeParamAdmin):
@@ -52,7 +56,6 @@ class ClientAdmin(admin.ModelAdmin):
     list_display = ['name', 'id_telegram', 'address', 'consent_to_pdProc']
     list_filter = ['consent_to_pdProc']
     search_fields = ['name', 'id_telegram']
-    list_display = ['name', 'id_telegram', 'consent_to_pdProc']
     inlines = [ClientOrdersInline]
 
 
@@ -64,13 +67,6 @@ class LinkAdmin(admin.ModelAdmin):
         return instance.clicks
 
 
-admin.site.register(Order)
-admin.site.register(Cake)
-admin.site.register(Level)
-admin.site.register(Shape)
-admin.site.register(Topping)
-admin.site.register(Berries)
-admin.site.register(Decor)
 admin.site.register(Complaint)
 admin.site.register(PromoCode)
 
