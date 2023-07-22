@@ -99,14 +99,19 @@ class Cake(models.Model):
         return f'{sum([param.price for param in self.get_params()])} руб.'
 
     def get_composition(self):
-        return f'{self.__str__()}\n' \
-               'Состав:\n'\
-               f'Количество уровней: {self.level.title}\n' \
-               f'Форма коржей: {self.shape.title}\n' \
-               f'Топпинг: {self.topping.title}\n' \
-               f'Ягоды: {self.berries.title}\n' \
-               f'Декор: {self.decor.title}\n' \
-               f'Надпись на торте: {self.text}\n' 
+        message = f'{self.__str__()}\n' \
+                  'Состав:\n'\
+                  f'Количество уровней: {self.level.title}\n' \
+                  f'Форма коржей: {self.shape.title}\n' \
+                  f'Топпинг: {self.topping.title}\n' 
+        if self.berries:
+            message += f'Ягоды: {self.berries.title}\n'
+        if self.decor:
+            message += f'Декор: {self.decor.title}\n'
+        if self.text:
+            message += f'Надпись на торте: {self.text}\n'
+        message += f'Цена торта {self.get_price()}'
+        return message
 
     def verify_cake(self):
         for param in self.get_params():
