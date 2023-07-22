@@ -197,8 +197,10 @@ class Link(models.Model):
         'Место использования ссылки',
         max_length=50,
         null=True, blank=True)
+    _link_clicks_number = models.IntegerField('Количество кликов')
 
     @property
-    def clicks(self):
+    def link_clicks_number(self):
         return count_clicks(self.shorten_link)
+
 

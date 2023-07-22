@@ -31,3 +31,7 @@ admin.site.register(Berries)
 admin.site.register(Decor)
 admin.site.register(Complaint)
 admin.site.register(PromoCode)
+
+
+
+
