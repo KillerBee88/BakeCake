@@ -108,7 +108,6 @@ class Cake(models.Model):
 class Client(models.Model):
     id_telegram = models.CharField('Телеграм id', max_length=20)
     name = models.CharField('Имя', max_length=30, default='Дорогой Гость')
-    address = models.CharField('Адрес', max_length=80, null=True, blank=True)
     consent_to_pdProc = models.BooleanField(
         'Согласие на обработку ПД',
         default=False)
@@ -149,6 +148,7 @@ class Order(models.Model):
     delivery_dt = models.DateTimeField(
         'Дата и время доставки',
         null=True, blank=True)
+    address = models.CharField('Адрес', max_length=80, null=True, blank=True)
     promo_code = models.ForeignKey(
         PromoCode,
         verbose_name='Промокод',
