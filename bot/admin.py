@@ -24,3 +24,7 @@ admin.site.register(Decor)
 admin.site.register(Complaint)
 admin.site.register(PromoCode)
 admin.site.register(Link)
+
+
+
+
