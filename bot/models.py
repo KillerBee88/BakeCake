@@ -177,12 +177,14 @@ class Order(models.Model):
 
 
 def create_new_bitlink():
-    next_bitlink_id = Link.objects.aggregate(Max('id'))['id__max'] + 1
+    max_id = Link.objects.aggregate(Max('id'))['id__max']
+    if not max_id:
+        max_id = 0
+    next_bitlink_id = max_id + 1
     while True:
         if not is_bitlink(BOT_LINK, next_bitlink_id):
             return shorten_link(BOT_LINK, next_bitlink_id)
         next_bitlink_id += 1
-
 
 
 class Link(models.Model):
