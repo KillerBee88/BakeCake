@@ -151,7 +151,10 @@ def callback_query(call):
                                             callback_data='main_menu;')
         markup.add(button)
         # TODO: Убрать магическое число
-        bot.send_message(-1001854282629, order)
+        markup2 = types.InlineKeyboardMarkup()
+        button2 = types.InlineKeyboardButton(text='Написать заказчику', url=f'tg://user?id={call.message.chat.id}')
+        markup2.add(button2)
+        bot.send_message(-1001854282629, order, reply_markup=markup2)
         bot.send_message(call.message.chat.id,
                          'Ожидайте доставку вашего тортика!',
                          reply_markup=markup)
