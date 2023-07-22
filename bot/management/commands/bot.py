@@ -114,6 +114,9 @@ def callback_query(call):
         bot.register_next_step_handler(msg, set_delivery_address, order)
 
     elif call.data.startswith('get_delivery_datetime'):
+        user = Client.objects.get(id_telegram=call.message.chat.id)
+        user.consent_to_pdProc = True
+        user.save()
         order_id = callback_data[1]
         get_order_date(call.message, order_id)
 
@@ -237,9 +240,16 @@ def set_delivery_address(message, order):
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
-    bot.send_message(message.chat.id,
-                     'Вы согласны на обработку персональных данных?',
-                     reply_markup=markup)
+    user = Client.objects.get(id_telegram=message.chat.id)
+
+    if user.consent_to_pdProc:
+        get_order_date(message, order.id)
+    else:
+        with open('Согласие_на_обработку_персональных_данных.pdf', 'rb') as file:
+            bot.send_document(message.chat.id,
+                              document=file,
+                              caption='Вы согласны на обработку персональных данных?',
+                              reply_markup=markup)
 
 
 def set_cake_text(message, msg_text, cake_id):
