@@ -66,7 +66,7 @@ def callback_query(call):
         cake_id = callback_data[1]
         level_id = callback_data[2]
         cake = Cake.objects.get(id=cake_id)
-        cake.levels = Level.objects.get(id=level_id)
+        cake.level = Level.objects.get(id=level_id)
         cake.save()
         choose_shape(call.message, cake)
 
@@ -111,7 +111,7 @@ def callback_query(call):
     elif call.data.startswith('no_cake_text'):
         bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
         cake_id = callback_data[1]
-        set_cake_text(call.message, '', cake_id)
+        set_cake_text(call.message, 'Без надписи.', cake_id)
 
     elif call.data.startswith('create_order'):
         cake_id = callback_data[1]
@@ -180,7 +180,7 @@ def request_cake_text(message, cake):
     markup = types.InlineKeyboardMarkup()
     markup.add(button)
     msg = bot.send_message(message.chat.id,
-                           'Хочешь добавить надпись на торт? Если да, то напиши её.',
+                           'Хочешь добавить надпись на торт? Если да, то напиши её. (+ 200р к стоимости)',
                            reply_markup=markup)
     bot.register_next_step_handler(msg, set_cake_text, msg.text, cake.id)
 
@@ -283,19 +283,24 @@ def set_cake_text(message, msg_text, cake_id):
     markup.add(*buttons)
 
     bot.send_message(message.chat.id,
-                     f'Вот какой торт получился:\n{cake}',
+                     f'Вот какой торт получился:\n{cake.get_composition()}',
                      reply_markup=markup)
 
 
 def choose_level(message, cake):
     levels = Level.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=level.title, callback_data=f'choose_shape;{cake.id};{level.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{level.title}\n(+{level.price}р)', callback_data=f'choose_shape;{cake.id};{level.id};') for
                level in levels]
-    media = [InputMediaPhoto(level.image) for level in levels]
+    media = [InputMediaPhoto(level.image) if level.image else None for level in levels]
+    media = list(set(media))
+    if None in media:
+        media.remove(None)
+    if media:
+        bot.send_media_group(message.chat.id,
+                             media=media)
+
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
-    bot.send_media_group(message.chat.id,
-                         media=media)
     bot.send_message(message.chat.id,
                      'Выбери количество уровней.',
                      reply_markup=markup)
@@ -303,14 +308,18 @@ def choose_level(message, cake):
 
 def choose_shape(message, cake):
     shapes = Shape.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=shape.title, callback_data=f'choose_topping;{cake.id};{shape.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{shape.title}\n(+{shape.price}р)', callback_data=f'choose_topping;{cake.id};{shape.id};') for
                shape in shapes]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
-    media = [InputMediaPhoto(shape.image) for shape in shapes]
-    bot.send_media_group(message.chat.id,
-                         media=media)
+    media = [InputMediaPhoto(shape.image) if shape.image else None for shape in shapes]
+    media = list(set(media))
+    if None in media:
+        media.remove(None)
+    if media:
+        bot.send_media_group(message.chat.id,
+                             media=media)
     bot.send_message(message.chat.id,
                      'Выбери форму торта.',
                      reply_markup=markup)
@@ -318,14 +327,18 @@ def choose_shape(message, cake):
 
 def choose_topping(message, cake):
     toppings = Topping.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=topping.title, callback_data=f'choose_berries;{cake.id};{topping.id};')
+    buttons = [types.InlineKeyboardButton(text=f'{topping.title}\n(+{topping.price}р)', callback_data=f'choose_berries;{cake.id};{topping.id};')
                for topping in toppings]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
-    media = [InputMediaPhoto(topping.image) for topping in toppings]
-    bot.send_media_group(message.chat.id,
-                         media=media)
+    media = [InputMediaPhoto(topping.image) if topping.image else None for topping in toppings]
+    media = list(set(media))
+    if None in media:
+        media.remove(None)
+    if media:
+        bot.send_media_group(message.chat.id,
+                             media=media)
     bot.send_message(message.chat.id,
                      'Выбери топпинг.',
                      reply_markup=markup)
@@ -333,14 +346,18 @@ def choose_topping(message, cake):
 
 def choose_berries(message, cake):
     berries = Berries.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=berry.title, callback_data=f'choose_decor;{cake.id};{berry.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{berry.title}\n(+{berry.price}р)', callback_data=f'choose_decor;{cake.id};{berry.id};') for
                berry in berries]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
-    media = [InputMediaPhoto(berry.image) for berry in berries]
-    bot.send_media_group(message.chat.id,
-                         media=media)
+    media = [InputMediaPhoto(berry.image) if berry.image else None for berry in berries]
+    media = list(set(media))
+    if None in media:
+        media.remove(None)
+    if media:
+        bot.send_media_group(message.chat.id,
+                             media=media)
     bot.send_message(message.chat.id,
                      'Выбери ягоды.',
                      reply_markup=markup)
@@ -348,14 +365,18 @@ def choose_berries(message, cake):
 
 def choose_decor(message, cake):
     decors = Decor.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=decor.title, callback_data=f'choose_cake_text;{cake.id};{decor.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{decor.title}\n(+{decor.price}р)', callback_data=f'choose_cake_text;{cake.id};{decor.id};') for
                decor in decors]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
-    media = [InputMediaPhoto(decor.image) for decor in decors]
-    bot.send_media_group(message.chat.id,
-                         media=media)
+    media = [InputMediaPhoto(decor.image) if decor.image else None for decor in decors]
+    media = list(set(media))
+    if None in media:
+        media.remove(None)
+    if media:
+        bot.send_media_group(message.chat.id,
+                             media=media)
     bot.send_message(message.chat.id,
                      'Выбери декор.',
                      reply_markup=markup)
@@ -409,9 +430,13 @@ def choose_prebuilt_cake(message):
     mm_but = types.InlineKeyboardButton(text='В Главное Меню',
                                         callback_data='main_menu;')
 
-    media = [InputMediaPhoto(cake.image) for cake in original_cakes]
-    bot.send_media_group(message.chat.id,
-                         media=media)
+    media = [InputMediaPhoto(cake.image) if bool(cake.image) else None for cake in original_cakes]
+    media = list(set(media))
+    if None in media:
+        media.remove(None)
+    if media:
+        bot.send_media_group(message.chat.id,
+                             media=media)
     markup.add(*buttons, mm_but)
     bot.send_message(message.chat.id,
                      'Выбирай торт на свой вкус!',

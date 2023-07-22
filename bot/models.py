@@ -31,6 +31,9 @@ class Level(CakeParam):
         unique=True,
         default=1)
 
+    def __str__(self):
+        return str(self.title)
+
 
 class Shape(CakeParam):
     title = models.CharField('Название формы', max_length=20)
@@ -53,7 +56,8 @@ class Cake(models.Model):
     title = models.CharField(
         'Название торта',
         null=True, blank=True,
-        max_length=50)           
+        max_length=50,
+        default=f'Торт')
     image = models.ImageField('Изображение', null=True, blank=True)     
     description = models.TextField('Описание', null=True, blank=True)   
 
@@ -97,12 +101,12 @@ class Cake(models.Model):
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
-        return f'{sum([param.price for param in self.get_params()])} руб.'
+        return f'{sum([param.price if param else 0 for param in self.get_params()])} руб.'
 
     def get_composition(self):
         message = f'{self.__str__()}\n' \
                   'Состав:\n'\
-                  f'Количество уровней: {self.level.title}\n' \
+                  f'Количество уровней: {self.level}\n' \
                   f'Форма коржей: {self.shape.title}\n' \
                   f'Топпинг: {self.topping.title}\n'
         if self.berries:
@@ -111,7 +115,7 @@ class Cake(models.Model):
             message += f'Декор: {self.decor.title}\n'
         if self.text:
             message += f'Надпись на торте: {self.text}\n'
-        message += f'Цена торта {self.get_price()}'
+        message += f'Стоимость торта {self.get_price()}'
         return message
 
     def verify_cake(self):
