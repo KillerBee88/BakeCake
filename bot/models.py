@@ -8,6 +8,7 @@ from bot.bitlink import is_bitlink, shorten_link, count_clicks
 
 class CakeParam(models.Model):
     title = models.CharField('Название', max_length=20) 
+    image = models.ImageField('Изображение', null=True, blank=True)
     price = models.DecimalField(
         'Цена',
         default=0.00,
