@@ -182,6 +182,19 @@ class Order(models.Model):
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
         return f'{round(order_price, 2)} руб.'
 
+    def get_description(self):
+        message = f'{self.__str__()}:\n' \
+                  f'{self.cake.__str__()}\n'
+        if self.delivery_dt:
+            message += f'Доставить {self.delivery_dt}\n'
+        if self.address:
+            if self.delivery_dt:
+                message += f'По адресу {self.address}\n'
+            else:
+                message += f'Доставить по адресу {self.address}\n'
+        message += f'Стоимость заказа {self.get_price()}'
+        return message
+
     def __str__(self):
         return f'Заказ #{self.id} от {self.order_dt}'
 
