@@ -1,5 +1,6 @@
 from django.contrib import admin
-from bot.models import Client, Order, Cake, Levels, Shape, Topping, Berries, Decor, Link
+from bot.models import (Client, Order, Cake, Level, Shape, Topping, Berries,
+                        Decor, Complaint, PromoCode, Link)
 
 
 class ClientOrdersInline(admin.TabularInline):
@@ -13,11 +14,24 @@ class ClientAdmin(admin.ModelAdmin):
     inlines = [ClientOrdersInline]
 
 
+@admin.register(Link)
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'shorten_link', 'place_of_use', 'clicks_count')
+
+    def clicks_count(self, instance):
+        return instance.clicks
+
+
 admin.site.register(Order)
 admin.site.register(Cake)
-admin.site.register(Levels)
+admin.site.register(Level)
 admin.site.register(Shape)
 admin.site.register(Topping)
 admin.site.register(Berries)
 admin.site.register(Decor)
-admin.site.register(Link)
+admin.site.register(Complaint)
+admin.site.register(PromoCode)
+
+
+
+

@@ -1,12 +1,14 @@
 from django.db import models
 from datetime import timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
-from BakeCake.settings import URGENT_ORDER_ALLOWANCE, BITLY_TOKEN
-from bot.bitlink import shorten_link, count_clicks
+from django.db.models import Max
+from BakeCake.settings import URGENT_ORDER_ALLOWANCE, BOT_LINK
+from bot.bitlink import is_bitlink, shorten_link, count_clicks
 
 
 class CakeParam(models.Model):
     title = models.CharField('Название', max_length=20) 
+    image = models.ImageField('Изображение', null=True, blank=True)
     price = models.DecimalField(
         'Цена',
         default=0.00,
@@ -17,7 +19,7 @@ class CakeParam(models.Model):
         abstract = True
 
 
-class Levels(CakeParam):
+class Level(CakeParam):
     LEVEL_CHOICES = [
         (1, '1 уровень'),
         (2, '2 уровня'),
@@ -55,8 +57,8 @@ class Cake(models.Model):
     image = models.ImageField('Изображение', null=True, blank=True)     
     description = models.TextField('Описание', null=True, blank=True)   
 
-    levels = models.ForeignKey(
-        Levels,
+    level = models.ForeignKey(
+        Level,
         verbose_name='Уровни',
         null=True,
         on_delete=models.PROTECT)  
@@ -75,9 +77,9 @@ class Cake(models.Model):
         verbose_name='Ягоды',
         null=True, blank=True,
         on_delete=models.SET_NULL)  
-    topping = models.ForeignKey(
-        Topping,
-        verbose_name='Топпинг',
+    decor = models.ForeignKey(
+        Decor,
+        verbose_name='Декор',
         null=True, blank=True,
         on_delete=models.SET_NULL)  
     text = models.CharField(
@@ -91,11 +93,26 @@ class Cake(models.Model):
         return f'Торт #{self.id}'
 
     def get_params(self):
-        return [self.levels, self.shape,
+        return [self.level, self.shape,
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
-        return sum([param.price for param in self.get_params()])
+        return f'{sum([param.price for param in self.get_params()])} руб.'
+
+    def get_composition(self):
+        message = f'{self.__str__()}\n' \
+                  'Состав:\n'\
+                  f'Количество уровней: {self.level.title}\n' \
+                  f'Форма коржей: {self.shape.title}\n' \
+                  f'Топпинг: {self.topping.title}\n' 
+        if self.berries:
+            message += f'Ягоды: {self.berries.title}\n'
+        if self.decor:
+            message += f'Декор: {self.decor.title}\n'
+        if self.text:
+            message += f'Надпись на торте: {self.text}\n'
+        message += f'Цена торта {self.get_price()}'
+        return message
 
     def verify_cake(self):
         for param in self.get_params():
@@ -107,7 +124,6 @@ class Cake(models.Model):
 class Client(models.Model):
     id_telegram = models.CharField('Телеграм id', max_length=20)
     name = models.CharField('Имя', max_length=30, default='Дорогой Гость')
-    address = models.CharField('Адрес', max_length=80, null=True, blank=True)
     consent_to_pdProc = models.BooleanField(
         'Согласие на обработку ПД',
         default=False)
@@ -148,6 +164,7 @@ class Order(models.Model):
     delivery_dt = models.DateTimeField(
         'Дата и время доставки',
         null=True, blank=True)
+    address = models.CharField('Адрес', max_length=80, null=True, blank=True)
     promo_code = models.ForeignKey(
         PromoCode,
         verbose_name='Промокод',
@@ -169,26 +186,49 @@ class Order(models.Model):
         order_price = cake_price * \
                       (1 - self.promo_code.discount) * \
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
-        return round(order_price, 2)
+        return f'{round(order_price, 2)} руб.'
+
+    def get_description(self):
+        message = f'{self.__str__()}:\n' \
+                  f'{self.cake.__str__()}\n'
+        if self.delivery_dt:
+            message += f'Доставить {self.delivery_dt}\n'
+        if self.address:
+            if self.delivery_dt:
+                message += f'По адресу {self.address}\n'
+            else:
+                message += f'Доставить по адресу {self.address}\n'
+        message += f'Стоимость заказа {self.get_price()}'
+        return message
 
     def __str__(self):
-        return f'Заказ #{self.id}'
+        return f'Заказ #{self.id} от {self.order_dt}'
 
-    def price(self):
-        return 100
+
+def create_new_bitlink():
+    max_id = Link.objects.aggregate(Max('id'))['id__max']
+    if not max_id:
+        max_id = 0
+    next_bitlink_id = max_id + 1
+    while True:
+        if not is_bitlink(BOT_LINK, next_bitlink_id):
+            return shorten_link(BOT_LINK, next_bitlink_id)
+        next_bitlink_id += 1
 
 
 class Link(models.Model):
-    url = models.CharField('Адрес', unique=True, max_length=100)
-
-    def __get_shorten_link(self):
-        return shorten_link(BITLY_TOKEN, self.url)
-
     shorten_link = models.CharField(
         'Сокращенная ссылка',
-        max_length=30,
-        default=__get_shorten_link)
+        max_length=20,
+        null=True, blank=True,
+        default=create_new_bitlink)
+    place_of_use = models.CharField(
+        'Место использования ссылки',
+        max_length=50,
+        null=True, blank=True)
 
     @property
     def clicks(self):
-        return count_clicks(BITLY_TOKEN, self.shorten_link)
+        return count_clicks(self.shorten_link)
+
+

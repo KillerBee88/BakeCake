@@ -44,6 +44,10 @@ DAILY_CAKE_AMOUNT_LIMIT = 10
 
 BITLY_TOKEN = env("BITLY_TOKEN")
 
+TELEGRAM_TOKEN = env("TELEGRAM_TOKEN")
+
+BOT_LINK = env("BOT_LINK")
+
 ALLOWED_HOSTS = []
 
 
@@ -57,7 +61,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bot.apps.BotConfig',
-    #'bot'
 ]
 
 MIDDLEWARE = [
