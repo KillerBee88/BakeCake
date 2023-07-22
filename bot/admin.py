@@ -4,6 +4,7 @@ from .models import Cake, Order, Client, Levels, Shape, Topping, Berries, Decor
 class CakeParamAdmin(admin.ModelAdmin):
     list_display = ['title', 'price', 'is_available']
     list_filter = ['is_available']
+    list_editable = ['is_available']
     search_fields = ['title']
     ordering = ['title']
 
