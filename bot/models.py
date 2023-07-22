@@ -97,7 +97,8 @@ class Cake(models.Model):
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
-        return f'{sum([param.price for param in self.get_params()])} руб.'
+        return f'{sum([param.price if param else 0 
+                       for param in self.get_params()])} руб.'
 
     def get_composition(self):
         message = f'{self.__str__()}\n' \
