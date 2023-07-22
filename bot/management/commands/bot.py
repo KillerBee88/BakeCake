@@ -94,11 +94,15 @@ def callback_query(call):
     elif call.data.startswith('choose_cake_text'):
         cake_id = callback_data[1]
         decor_id = callback_data[2]
+        cake = Cake.objects.get(id=cake_id)
+        if cake.is_original:
+            cake.pk = None
+            cake.save()
         if decor_id:
-            cake = Cake.objects.get(id=cake_id)
             cake.decor = Decor.objects.get(id=decor_id)
             cake.save()
-        cake = Cake.objects.get(id=cake_id)
+        cake.is_original = False
+        cake.save()
         request_cake_text(call.message, cake)
 
     elif call.data.startswith('no_cake_text'):
