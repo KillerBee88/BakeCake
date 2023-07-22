@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 
 from django.core.management.base import BaseCommand
 from telebot import TeleBot, types
-from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaPhoto, InputMedia
 
 import BakeCake.settings
 from bot.views import get_user_orders, get_serialized_order
-from bot.models import Client, Cake, Levels, Shape
+from bot.models import Client, Cake, Level, Shape
 from bot.models import Topping, Berries, Decor, Order
 from BakeCake.settings import TELEGRAM_TOKEN
 
@@ -66,7 +66,7 @@ def callback_query(call):
         cake_id = callback_data[1]
         level_id = callback_data[2]
         cake = Cake.objects.get(id=cake_id)
-        cake.levels = Levels.objects.get(id=level_id)
+        cake.levels = Level.objects.get(id=level_id)
         cake.save()
         choose_shape(call.message, cake)
 
@@ -218,7 +218,9 @@ def get_order_time(message, order_id, date_str):
     base = datetime.strptime(f'{date_str}_10.00', '%d.%m.%Y_%H.%M')
     time_list = [base + timedelta(hours=x) for x in range(8)]
 
-    buttons = [types.InlineKeyboardButton(text=f'{date.strftime("%H:%M")}', callback_data=f'set_time;{order_id};{date.strftime("%d.%m.%Y_%H:%M")};') for date in time_list]
+    buttons = [types.InlineKeyboardButton(text=f'{date.strftime("%H:%M")}',
+                                          callback_data=f'set_time;{order_id};{date.strftime("%d.%m.%Y_%H:%M")};') for
+               date in time_list]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
@@ -231,7 +233,9 @@ def get_order_date(message, order_id):
     base = datetime.today()
     date_list = [base + timedelta(days=x) for x in range(1, 6)]
 
-    buttons = [types.InlineKeyboardButton(text=f'{date.strftime("%d.%m")}', callback_data=f'set_date;{order_id};{date.strftime("%d.%m.%Y")};') for date in date_list]
+    buttons = [types.InlineKeyboardButton(text=f'{date.strftime("%d.%m")}',
+                                          callback_data=f'set_date;{order_id};{date.strftime("%d.%m.%Y")};') for date in
+               date_list]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
 
@@ -284,10 +288,14 @@ def set_cake_text(message, msg_text, cake_id):
 
 
 def choose_level(message, cake):
-    levels = Levels.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=level.title, callback_data=f'choose_shape;{cake.id};{level.id};') for level in levels]
+    levels = Level.objects.filter(is_available=True)
+    buttons = [types.InlineKeyboardButton(text=level.title, callback_data=f'choose_shape;{cake.id};{level.id};') for
+               level in levels]
+    media = [InputMediaPhoto(level.image) for level in levels]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
+    bot.send_media_group(message.chat.id,
+                         media=media)
     bot.send_message(message.chat.id,
                      'Выбери количество уровней.',
                      reply_markup=markup)
@@ -295,9 +303,14 @@ def choose_level(message, cake):
 
 def choose_shape(message, cake):
     shapes = Shape.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=shape.title, callback_data=f'choose_topping;{cake.id};{shape.id};') for shape in shapes]
+    buttons = [types.InlineKeyboardButton(text=shape.title, callback_data=f'choose_topping;{cake.id};{shape.id};') for
+               shape in shapes]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
+
+    media = [InputMediaPhoto(shape.image) for shape in shapes]
+    bot.send_media_group(message.chat.id,
+                         media=media)
     bot.send_message(message.chat.id,
                      'Выбери форму торта.',
                      reply_markup=markup)
@@ -305,9 +318,14 @@ def choose_shape(message, cake):
 
 def choose_topping(message, cake):
     toppings = Topping.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=topping.title, callback_data=f'choose_berries;{cake.id};{topping.id};') for topping in toppings]
+    buttons = [types.InlineKeyboardButton(text=topping.title, callback_data=f'choose_berries;{cake.id};{topping.id};')
+               for topping in toppings]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
+
+    media = [InputMediaPhoto(topping.image) for topping in toppings]
+    bot.send_media_group(message.chat.id,
+                         media=media)
     bot.send_message(message.chat.id,
                      'Выбери топпинг.',
                      reply_markup=markup)
@@ -315,9 +333,14 @@ def choose_topping(message, cake):
 
 def choose_berries(message, cake):
     berries = Berries.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=berry.title, callback_data=f'choose_decor;{cake.id};{berry.id};') for berry in berries]
+    buttons = [types.InlineKeyboardButton(text=berry.title, callback_data=f'choose_decor;{cake.id};{berry.id};') for
+               berry in berries]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
+
+    media = [InputMediaPhoto(berry.image) for berry in berries]
+    bot.send_media_group(message.chat.id,
+                         media=media)
     bot.send_message(message.chat.id,
                      'Выбери ягоды.',
                      reply_markup=markup)
@@ -325,9 +348,14 @@ def choose_berries(message, cake):
 
 def choose_decor(message, cake):
     decors = Decor.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=decor.title, callback_data=f'choose_cake_text;{cake.id};{decor.id};') for decor in decors]
+    buttons = [types.InlineKeyboardButton(text=decor.title, callback_data=f'choose_cake_text;{cake.id};{decor.id};') for
+               decor in decors]
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons)
+
+    media = [InputMediaPhoto(decor.image) for decor in decors]
+    bot.send_media_group(message.chat.id,
+                         media=media)
     bot.send_message(message.chat.id,
                      'Выбери декор.',
                      reply_markup=markup)
@@ -376,9 +404,14 @@ def order_cake(chat_id):
 def choose_prebuilt_cake(message):
     original_cakes = Cake.objects.filter(is_original=True)
     markup = types.InlineKeyboardMarkup()
-    buttons = [types.InlineKeyboardButton(text=cake.title, callback_data=f'choose_cake_text;{cake.id};') for cake in original_cakes]
+    buttons = [types.InlineKeyboardButton(text=cake.title, callback_data=f'choose_cake_text;{cake.id};') for cake in
+               original_cakes]
     mm_but = types.InlineKeyboardButton(text='В Главное Меню',
                                         callback_data='main_menu;')
+
+    media = [InputMediaPhoto(cake.image) for cake in original_cakes]
+    bot.send_media_group(message.chat.id,
+                         media=media)
     markup.add(*buttons, mm_but)
     bot.send_message(message.chat.id,
                      'Выбирай торт на свой вкус!',

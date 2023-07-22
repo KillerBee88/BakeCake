@@ -15,6 +15,11 @@ class ClientOrdersInline(admin.TabularInline):
     fields = ['id', 'cake']
 
 
+@admin.register(Level)
+class ShapeAdmin(CakeParamAdmin):
+    pass
+
+
 @admin.register(Shape)
 class ShapeAdmin(CakeParamAdmin):
     pass
@@ -38,7 +43,7 @@ class DecorAdmin(CakeParamAdmin):
 @admin.register(Cake)
 class CakeAdmin(admin.ModelAdmin):
     list_display = ['title', 'is_original', 'get_price']
-    list_filter = ['is_original', 'levels__title', 'shape__title', 'topping__title', 'berries__title']
+    list_filter = ['is_original', 'level__title', 'shape__title', 'topping__title', 'berries__title']
     search_fields = ['title', 'description']
 
 
@@ -67,9 +72,10 @@ class LinkAdmin(admin.ModelAdmin):
         return instance.clicks
 
 
+
+
 admin.site.register(Complaint)
 admin.site.register(PromoCode)
-
 
 
 
