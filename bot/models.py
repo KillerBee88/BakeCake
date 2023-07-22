@@ -96,7 +96,7 @@ class Cake(models.Model):
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
-        return sum([param.price for param in self.get_params()])
+        return f'{sum([param.price for param in self.get_params()])} руб.'
 
     def get_composition(self):
         return f'{self.__str__()}\n' \
@@ -180,10 +180,10 @@ class Order(models.Model):
         order_price = cake_price * \
                       (1 - self.promo_code.discount) * \
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
-        return round(order_price, 2)
+        return f'{round(order_price, 2)} руб.'
 
     def __str__(self):
-        return f'Заказ #{self.id}'
+        return f'Заказ #{self.id} от {self.order_dt}'
 
 
 def create_new_bitlink():
