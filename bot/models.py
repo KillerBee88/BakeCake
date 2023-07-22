@@ -104,7 +104,7 @@ class Cake(models.Model):
                   'Состав:\n'\
                   f'Количество уровней: {self.level.title}\n' \
                   f'Форма коржей: {self.shape.title}\n' \
-                  f'Топпинг: {self.topping.title}\n' 
+                  f'Топпинг: {self.topping.title}\n'
         if self.berries:
             message += f'Ягоды: {self.berries.title}\n'
         if self.decor:
@@ -124,6 +124,7 @@ class Cake(models.Model):
 class Client(models.Model):
     id_telegram = models.CharField('Телеграм id', max_length=20)
     name = models.CharField('Имя', max_length=30, default='Дорогой Гость')
+    address = models.CharField('Адрес', max_length=80, null=True, blank=True)
     consent_to_pdProc = models.BooleanField(
         'Согласие на обработку ПД',
         default=False)
