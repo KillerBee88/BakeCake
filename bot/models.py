@@ -27,22 +27,38 @@ class Levels(CakeParam):
         choices=LEVEL_CHOICES,
         unique=True,
         default=1)
+    
+    class Meta:
+        verbose_name_plural = 'Уровни'
 
 
 class Shape(CakeParam):
     title = models.CharField('Название формы', max_length=20)
 
+    class Meta:
+        verbose_name_plural = 'Форма'
+
 
 class Topping(CakeParam):
     title = models.CharField('Название топпинга', max_length=20)
+    
+    class Meta:
+        verbose_name_plural = 'Топпинг'
 
 
 class Berries(CakeParam):
     title = models.CharField('Название ягод', max_length=20)
+    
+    class Meta:
+        verbose_name_plural = 'Ягоды'
 
 
 class Decor(CakeParam):
     title = models.CharField('Название декора', max_length=20)
+    
+    class Meta:
+        verbose_name_plural = 'Декор'    
+
 
 
 class Cake(models.Model):
@@ -83,6 +99,9 @@ class Cake(models.Model):
         'Надпись на торте',
         max_length=100,
         null=True, blank=True)
+    
+    class Meta:
+        verbose_name_plural = 'Торты'
 
     def __str__(self):
         if self.title:
@@ -110,6 +129,9 @@ class Client(models.Model):
     consent_to_pdProc = models.BooleanField(
         'Согласие на обработку ПД',
         default=False)
+    
+    class Meta:
+        verbose_name_plural = 'Клиенты'
 
     def __str__(self):
         return f'{self.name}, {self.id_telegram}'
@@ -117,6 +139,9 @@ class Client(models.Model):
 
 class Complaint(models.Model):
     text = models.TextField('Текст жалобы')
+    
+    class Meta:
+        verbose_name_plural = 'Жалоба'
 
 
 class PromoCode(models.Model):
@@ -158,6 +183,9 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
         null=True, blank=True)
     # status
+    
+    class Meta:
+        verbose_name_plural = 'Заказы'
 
     def is_urgent_order(self):
         delta = self.delivery_dt - self.order_dt
