@@ -14,6 +14,14 @@ class ClientAdmin(admin.ModelAdmin):
     inlines = [ClientOrdersInline]
 
 
+@admin.register(Link)
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'shorten_link', 'place_of_use', 'clicks_count')
+
+    def clicks_count(self, instance):
+        return instance.clicks
+
+
 admin.site.register(Order)
 admin.site.register(Cake)
 admin.site.register(Level)
@@ -23,4 +31,3 @@ admin.site.register(Berries)
 admin.site.register(Decor)
 admin.site.register(Complaint)
 admin.site.register(PromoCode)
-admin.site.register(Link)
