@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.core.management.base import BaseCommand
 from telebot import TeleBot, types
+from telebot.types import InputMediaPhoto
 
 import BakeCake.settings
 from bot.views import get_user_orders, get_serialized_order
@@ -24,10 +25,11 @@ def main_menu(message):
                types.InlineKeyboardButton(text='Мои заказы',
                                           callback_data='my_orders;')]
     markup.add(*buttons)
-    # TODO: Прикрепить фотку с тортами к главному меню
-    bot.send_message(message.chat.id,
-                     'Добро пожаловать в Главное Меню! Время заказывать тортики!',
-                     reply_markup=markup, )
+    with open('BakeCake.png', 'rb') as file:
+        bot.send_photo(message.chat.id,
+                       photo=file,
+                       caption='Добро пожаловать в главное меню BakeCake! Время заказывать тортики!',
+                       reply_markup=markup, )
 
 
 @bot.callback_query_handler(func=lambda call: True)
