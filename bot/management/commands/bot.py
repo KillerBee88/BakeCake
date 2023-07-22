@@ -248,7 +248,7 @@ def get_order_date(message, order_id):
 
 
 def set_delivery_address(message, order):
-    order.comment = message.text
+    order.address = message.text
     order.save()
 
     buttons = [types.InlineKeyboardButton(text='Да',
