@@ -429,7 +429,7 @@ def view_order(message, order_id):
     markup.add(button)
     order = get_object_or_404(Order, id=order_id)
     bot.send_message(message.chat.id,
-                     f'Данные о твоём заказе:\n{order.get_description()}',
+                     f'Данные о твоём заказе:\n{order_view_str(order.id)}',
                      reply_markup=markup)
 
 
