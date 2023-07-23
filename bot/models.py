@@ -100,19 +100,20 @@ class Cake(models.Model):
         return sum([param.price if param else 0 
                     for param in self.get_params()])
 
-    def get_composition(self):
+    def get_composition(self, with_price=True):
         message = f'{self.__str__()}\n' \
                   'Состав:\n'\
                   f'Количество уровней: {self.level.title}\n' \
                   f'Форма коржей: {self.shape.title}\n' \
-                  f'Топпинг: {self.topping.title}\n' 
+                  f'Топпинг: {self.topping.title}' 
         if self.berries:
-            message += f'Ягоды: {self.berries.title}\n'
+            message += f'\nЯгоды: {self.berries.title}'
         if self.decor:
-            message += f'Декор: {self.decor.title}\n'
+            message += f'\nДекор: {self.decor.title}'
         if self.text:
-            message += f'Надпись на торте: {self.text}\n'
-        message += f'Цена торта {self.get_price()} руб.'
+            message += f'\nНадпись на торте: {self.text}'
+        if with_price:
+            message += f'\nЦена торта {self.get_price()} руб.'
         return message
 
     def verify_cake(self):
@@ -189,17 +190,18 @@ class Order(models.Model):
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
         return round(order_price, 2)
 
-    def get_description(self):
+    def get_description(self, with_price=True):
         message = f'{self.__str__()}:\n' \
-                  f'{self.cake.__str__()}\n'
+                  f'{self.cake.__str__()}'
         if self.delivery_dt:
-            message += f'Доставить {self.delivery_dt}\n'
+            message += f'\nДоставить {self.delivery_dt}'
         if self.address:
             if self.delivery_dt:
-                message += f'По адресу {self.address}\n'
+                message += f'\nПо адресу {self.address}'
             else:
-                message += f'Доставить по адресу {self.address}\n'
-        message += f'Стоимость заказа {self.get_price()} руб.'
+                message += f'\nДоставить по адресу {self.address}'
+        if with_price:
+            message += f'\nСтоимость заказа {self.get_price()} руб.'
         return message
 
     def __str__(self):
