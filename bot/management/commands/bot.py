@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.shortcuts import get_object_or_404
 from django.core.management.base import BaseCommand
 from telebot import TeleBot, types
 from telebot.types import InputMediaPhoto, InputMedia
