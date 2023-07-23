@@ -426,8 +426,9 @@ def view_order(message, order_id):
     button = types.InlineKeyboardButton(text='В Главное Меню',
                                         callback_data='main_menu;')
     markup.add(button)
+    order = get_object_or_404(Order, id=order_id)
     bot.send_message(message.chat.id,
-                     f'Данные о твоём заказе:\n{order_view_str(order_id)}',
+                     f'Данные о твоём заказе:\n{order.get_description()}',
                      reply_markup=markup)
 
 
