@@ -33,7 +33,7 @@ class Level(CakeParam):
         choices=LEVEL_CHOICES,
         unique=True,
         default=1)
-    
+
     class Meta:
         verbose_name_plural = 'Уровни'
 
@@ -47,23 +47,23 @@ class Shape(CakeParam):
 
 class Topping(CakeParam):
     title = models.CharField('Название топпинга', max_length=20)
-    
+
     class Meta:
         verbose_name_plural = 'Топпинг'
 
 
 class Berries(CakeParam):
     title = models.CharField('Название ягод', max_length=20)
-    
+
     class Meta:
         verbose_name_plural = 'Ягоды'
 
 
 class Decor(CakeParam):
     title = models.CharField('Название декора', max_length=20)
-    
+
     class Meta:
-        verbose_name_plural = 'Декор'    
+        verbose_name_plural = 'Декор'
 
 
 
@@ -106,7 +106,7 @@ class Cake(models.Model):
         'Надпись на торте',
         max_length=100,
         null=True, blank=True)
-    
+
     class Meta:
         verbose_name_plural = 'Торты'
 
@@ -169,7 +169,7 @@ class Client(models.Model):
 
 class Complaint(models.Model):
     text = models.TextField('Текст жалобы')
-    
+
     class Meta:
         verbose_name_plural = 'Жалоба'
 
@@ -214,7 +214,7 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
         null=True, blank=True)
     # status
-    
+
     class Meta:
         verbose_name_plural = 'Заказы'
 
@@ -223,7 +223,7 @@ class Order(models.Model):
         return  delta < timedelta(days=1)
 
     def get_price(self):
-        cake_price = self.cake.get_params()
+        cake_price = self.cake.get_price()
         order_price = cake_price * \
                       (1 - self.promo_code.discount if self.promo_code else 0.0) * \
                       (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
