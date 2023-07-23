@@ -15,6 +15,9 @@ class CakeParam(models.Model):
         max_digits=6, decimal_places=2)
     is_available = models.BooleanField('Есть в наличии', default=False)
 
+    def __str__(self):
+        return str(self.title)
+
     class Meta:
         abstract = True
 
@@ -33,9 +36,6 @@ class Level(CakeParam):
     
     class Meta:
         verbose_name_plural = 'Уровни'
-
-    def __str__(self):
-        return str(self.title)
 
 
 class Shape(CakeParam):
