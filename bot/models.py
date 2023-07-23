@@ -227,7 +227,7 @@ class Order(models.Model):
         order_price = cake_price * \
                       (1 - self.promo_code.discount if self.promo_code else 0) * \
                       (1 + URGENT_ORDER_ALLOWANCE if self.is_urgent_order() else 0)
-        return f'{round(order_price, 2)} руб.'
+        return round(order_price, 2)
 
     def get_description(self):
         message = f'{self.__str__()}:\n' \
@@ -239,7 +239,7 @@ class Order(models.Model):
                 message += f'По адресу {self.address}\n'
             else:
                 message += f'Доставить по адресу {self.address}\n'
-        message += f'Стоимость заказа {self.get_price()}'
+        message += f'Стоимость заказа {self.get_price()} руб.'
         return message
 
     def __str__(self):
