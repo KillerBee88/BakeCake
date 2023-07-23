@@ -1,6 +1,15 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from bot.models import (Client, Order, Cake, Level, Shape, Topping, Berries,
                         Decor, Complaint, PromoCode, Link)
+
+
+class CakeParamAdmin(admin.ModelAdmin):
+    list_display = ['title', 'price', 'is_available']
+    list_filter = ['is_available']
+    list_editable = ['is_available']
+    #search_fields = ['title']
+    ordering = ['title']
 
 
 class ClientOrdersInline(admin.TabularInline):
@@ -8,10 +17,57 @@ class ClientOrdersInline(admin.TabularInline):
     fields = ['id', 'cake']
 
 
+@admin.register(Level)
+class ShapeAdmin(CakeParamAdmin):
+    pass
+
+
+@admin.register(Shape)
+class ShapeAdmin(CakeParamAdmin):
+    pass
+
+
+@admin.register(Topping)
+class ToppingAdmin(CakeParamAdmin):
+    pass
+
+
+@admin.register(Berries)
+class BerriesAdmin(CakeParamAdmin):
+    pass
+
+
+@admin.register(Decor)
+class DecorAdmin(CakeParamAdmin):
+    pass
+
+
+@admin.register(Cake)
+class CakeAdmin(admin.ModelAdmin):
+    list_display = ['title', 'is_original', 'get_price']
+    list_filter = ['is_original', 'level__title', 'shape__title', 'topping__title', 'berries__title']
+    search_fields = ['title', 'description']
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'cake', 'client', 'order_dt', 'delivery_dt', 'promo_code', 'get_price']
+    list_filter = ['cake', 'client', 'promo_code']
+    search_fields = ['id', 'cake__title', 'client__name']
+    date_hierarchy = 'order_dt'
+    ordering = ['-order_dt']
+
+
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ['name', 'id_telegram', 'consent_to_pdProc']
+    list_display = ['name', 'id_telegram', 'telegram_link', 'consent_to_pdProc']
+    list_filter = ['consent_to_pdProc']
+    search_fields = ['name', 'id_telegram']
+    readonly_fields = ['name', 'id_telegram', 'telegram_link', 'consent_to_pdProc', 'telegram_url', 'nickname']
     inlines = [ClientOrdersInline]
+
+    def telegram_link(self, obj):
+        return format_html("<a href='{url}'>{url}</a>", url=obj.telegram_url)
 
 
 @admin.register(Link)
@@ -22,16 +78,10 @@ class LinkAdmin(admin.ModelAdmin):
         return instance.clicks
 
 
-admin.site.register(Order)
-admin.site.register(Cake)
-admin.site.register(Level)
-admin.site.register(Shape)
-admin.site.register(Topping)
-admin.site.register(Berries)
-admin.site.register(Decor)
+
+
 admin.site.register(Complaint)
 admin.site.register(PromoCode)
-
 
 
 

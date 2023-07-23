@@ -42,7 +42,9 @@ MIN_PRODUCTION_TIME = timedelta(hours=8)
 
 DAILY_CAKE_AMOUNT_LIMIT = 10
 
-BITLY_TOKEN = env("BITLY_TOKEN")
+BITLY_TOKEN = env('BITLY_TOKEN')
+
+ADMIN_CHANNEL_ID = -943084534
 
 TELEGRAM_TOKEN = env("TELEGRAM_TOKEN")
 
@@ -127,7 +129,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
+
+LANGUAGES = [
+    ('ru', ('Russian')),
+]
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -142,3 +148,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_ROOT = 'media/'
