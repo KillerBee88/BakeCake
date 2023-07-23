@@ -113,7 +113,7 @@ class Cake(models.Model):
     def __str__(self):
         if self.title:
             return f'Торт {self.title}'
-        return f'Торт #{self.id}'
+        return f'Торт №{self.id}'
 
     def get_params(self):
         return [self.level, self.shape,
@@ -135,7 +135,7 @@ class Cake(models.Model):
         if self.text:
             message += f'\nНадпись на торте: {self.text}'
         if with_price:
-            message += f'\nСтоимость торта {self.get_price()} р.'
+            message += f'\nСтоимость торта {self.get_price()} руб.'
         return message
 
     def verify_cake(self):
@@ -230,22 +230,35 @@ class Order(models.Model):
                       (1 + URGENT_ORDER_ALLOWANCE if self.is_urgent_order() else 0)
         return round(order_price, 2)
 
-    def get_description(self, with_price=True):
-        message = f'{self.__str__()}:\n' \
-                  f'{self.cake.__str__()}'
+    def get_description(self, with_cake=True, with_cake_price=False):
+        message = f'{self.__str__()}:\n'
+        if with_cake:
+            message += self.cake.get_composition(with_cake_price)
+        else:
+            message += self.cake.__str__()
+
         if self.delivery_dt:
-            message += f'\nДоставить {self.delivery_dt}'
+            message += f'\nДоставить {self.delivery_dt.strftime("%d.%m.%y %H:%M")}\n'
         if self.address:
             if self.delivery_dt:
-                message += f'\nПо адресу {self.address}'
+                message += f'По адресу {self.address}\n'
             else:
-                message += f'\nДоставить по адресу {self.address}'
-        if with_price:
-            message += f'\nСтоимость заказа {self.get_price()} руб.'
+                message += f'Доставить по адресу {self.address}\n'
+        if self.comment:
+            message += f'Комментарий к заказу: {self.comment}\n\n'
+
+        if self.promo_code:
+            message += f'С учетом скидки {self.promo_code.code} ' \
+                       f'в {self.promo_code.discount * 100}%\n'
+        if self.is_urgent_order():
+            message += 'С учетом надбавки за срочный заказ ' \
+                       f'в {URGENT_ORDER_ALLOWANCE * 100}%\n'
+
+        message += f'Стоимость заказа <b>{self.get_price()} руб.</b>'
         return message
 
     def __str__(self):
-        return f'Заказ #{self.id} от {self.order_dt}'
+        return f'Заказ №{self.id} от {self.order_dt.strftime("%d.%m.%y")}'
 
 
 def create_new_bitlink():
