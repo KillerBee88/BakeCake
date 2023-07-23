@@ -120,7 +120,7 @@ class Cake(models.Model):
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
-        return f'{sum([param.price if param else 0 for param in self.get_params()])} руб.'
+        return sum([param.price if param else 0 for param in self.get_params()])
 
     def get_composition(self):
         message = f'{self.__str__()}\n' \
@@ -134,7 +134,7 @@ class Cake(models.Model):
             message += f'Декор: {self.decor.title}\n'
         if self.text:
             message += f'Надпись на торте: {self.text}\n'
-        message += f'Стоимость торта {self.get_price()}'
+        message += f'Стоимость торта {self.get_price()} р.'
         return message
 
     def verify_cake(self):
@@ -220,13 +220,13 @@ class Order(models.Model):
 
     def is_urgent_order(self):
         delta = self.delivery_dt - self.order_dt
-        return  delta < timedelta(days=1)
+        return delta < timedelta(days=1)
 
     def get_price(self):
         cake_price = self.cake.get_price()
         order_price = cake_price * \
-                      (1 - self.promo_code.discount if self.promo_code else 0.0) * \
-                      (1 + self.is_urgent_order() * URGENT_ORDER_ALLOWANCE)
+                      (1 - self.promo_code.discount if self.promo_code else 0) * \
+                      (1 + URGENT_ORDER_ALLOWANCE if self.is_urgent_order() else 0)
         return f'{round(order_price, 2)} руб.'
 
     def get_description(self):

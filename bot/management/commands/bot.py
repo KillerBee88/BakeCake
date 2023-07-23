@@ -5,7 +5,7 @@ from telebot import TeleBot, types
 from telebot.types import InputMediaPhoto, InputMedia
 
 import BakeCake.settings
-from bot.views import get_user_orders, get_serialized_order
+from bot.views import get_user_orders, get_serialized_order, order_view, order_view_str
 from bot.models import Client, Cake, Level, Shape
 from bot.models import Topping, Berries, Decor, Order
 from BakeCake.settings import TELEGRAM_TOKEN
@@ -147,7 +147,6 @@ def callback_query(call):
         order.save()
         comment_order(call.message, order)
 
-
     elif call.data.startswith('accept_order'):
         order_id = callback_data[1]
         order = Order.objects.get(id=order_id)
@@ -159,7 +158,7 @@ def callback_query(call):
         markup2 = types.InlineKeyboardMarkup()
         button2 = types.InlineKeyboardButton(text='Написать заказчику', url=f'tg://user?id={call.message.chat.id}')
         markup2.add(button2)
-        bot.send_message(-1001854282629, order.get_description(), reply_markup=markup2)
+        bot.send_message(-1001854282629, order_view_str(order.id), reply_markup=markup2)
 
         bot.send_message(call.message.chat.id,
                          'Ожидайте доставку вашего тортика!',
@@ -180,6 +179,7 @@ def callback_query(call):
         order_id = callback_data[1]
         order = Order.objects.get(id=order_id)
         set_order_comment(call.message, 'Без комментариев', order)
+
 
 def comment_order(message, order):
     button = types.InlineKeyboardButton(text='Без комментариев',
@@ -422,13 +422,12 @@ def my_orders(message):
 
 
 def view_order(message, order_id):
-    order = get_serialized_order(order_id)
     markup = types.InlineKeyboardMarkup()
     button = types.InlineKeyboardButton(text='В Главное Меню',
                                         callback_data='main_menu;')
     markup.add(button)
     bot.send_message(message.chat.id,
-                     f'Данные о твоём заказе:\n{order}',
+                     f'Данные о твоём заказе:\n{order_view_str(order_id)}',
                      reply_markup=markup)
 
 

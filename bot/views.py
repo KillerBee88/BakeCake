@@ -29,9 +29,9 @@ def get_serialized_order(order_id):
     }
 
 
-def order_view(request, order_id):
+def order_view(order_id):
     order = get_object_or_404(Order, id=order_id)
-    
+
     serialized_order = {
         'description': f'Заказ №{order.id} от {order.order_dt.strftime("%d.%m.%y")}',
         'id': order.id,
@@ -45,5 +45,25 @@ def order_view(request, order_id):
         'comment': order.comment,
         'price': order.get_price()
     }
-    
-    return JsonResponse(serialized_order)
+
+    return serialized_order
+
+
+def order_view_str(order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    beautiful_order = f"""
+        'description': f'Заказ №{order.id} от {order.order_dt.strftime("%d.%m.%y")}',
+        'id': {order.id},
+        'cake': 
+            'title': {order.cake.title},
+            'image': {order.cake.image.url if order.cake.image else None},
+            'description': {order.cake.description},
+        ,
+        'creation_date': {order.order_dt},
+        'delivery_date': {order.delivery_dt},
+        'comment': {order.comment},
+        'price': {order.get_price()}
+    """
+
+    return beautiful_order
