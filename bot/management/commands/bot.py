@@ -356,7 +356,7 @@ def choose_shape(message, cake):
 
 def choose_topping(message, cake):
     toppings = Topping.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=f'{topping.title}\n(+{topping.price}р)', callback_data=f'choose_berries;{cake.id};{topping.id};')
+    buttons = [types.InlineKeyboardButton(text=f'{topping.title} (+{topping.price}р)', callback_data=f'choose_berries;{cake.id};{topping.id};')
                for topping in toppings]
     markup = types.InlineKeyboardMarkup()
     for btn in buttons:
