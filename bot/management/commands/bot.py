@@ -464,7 +464,9 @@ def choose_prebuilt_cake(message):
     if media:
         bot.send_media_group(message.chat.id,
                              media=media)
-    markup.add(*buttons, mm_but)
+    for btn in buttons:
+        markup.add(btn)
+    markup.add(mm_but)
     bot.send_message(message.chat.id,
                      'Выбирай торт на свой вкус!',
                      reply_markup=markup)
