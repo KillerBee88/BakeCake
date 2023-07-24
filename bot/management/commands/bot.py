@@ -452,7 +452,7 @@ def order_cake(chat_id):
 def choose_prebuilt_cake(message):
     original_cakes = Cake.objects.filter(is_original=True)
     markup = types.InlineKeyboardMarkup()
-    buttons = [types.InlineKeyboardButton(text=cake.title, callback_data=f'choose_cake_text;{cake.id};') for cake in
+    buttons = [types.InlineKeyboardButton(text=f'{cake.title} (+{cake.get_price()} р.)', callback_data=f'choose_cake_text;{cake.id};') for cake in
                original_cakes]
     mm_but = types.InlineKeyboardButton(text='В Главное Меню',
                                         callback_data='main_menu;')
