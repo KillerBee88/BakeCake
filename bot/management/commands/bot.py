@@ -16,6 +16,7 @@ bot = TeleBot(TELEGRAM_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def main_menu(message):
+    bot.clear_step_handler_by_chat_id(chat_id=message.chat.id)
     client = Client.objects.get_or_create(id_telegram=message.from_user.id)[0]
     client.name = f'{message.from_user.first_name}'
     client.nickname = message.from_user.username
@@ -51,6 +52,7 @@ def callback_query(call):
         my_orders(call.message)
 
     elif call.data.startswith('main_menu'):
+        bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
         main_menu(call.message)
 
     elif call.data.startswith('choose_prebuilt_cake'):
@@ -195,7 +197,7 @@ def comment_order(message, order):
 
 
 def set_order_comment(message, text, order):
-    order.comment = text
+    order.comment = message.text
     order.save()
 
     accept_order(message, order.id)
@@ -207,7 +209,7 @@ def request_cake_text(message, cake):
     markup = types.InlineKeyboardMarkup()
     markup.add(button)
     msg = bot.send_message(message.chat.id,
-                           'Хочешь добавить надпись на торт? Если да, то напиши её. (+ 200р к стоимости)',
+                           'Хочешь добавить надпись на торт? Если да, то напиши её. (+ 500р к стоимости)',
                            reply_markup=markup)
     bot.register_next_step_handler(msg, set_cake_text, msg.text, cake.id)
 
@@ -299,7 +301,7 @@ def set_delivery_address(message, order):
 
 def set_cake_text(message, msg_text, cake_id):
     cake = Cake.objects.get(id=cake_id)
-    cake.text = msg_text
+    cake.text = message.text
     cake.save()
 
     buttons = [types.InlineKeyboardButton(text='Оформить заказ',
