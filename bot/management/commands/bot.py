@@ -327,7 +327,8 @@ def choose_level(message, cake):
                              media=media)
 
     markup = types.InlineKeyboardMarkup()
-    markup.add(*buttons)
+    for btn in buttons:
+        markup.add(btn)
     bot.send_message(message.chat.id,
                      'Выбери количество уровней.',
                      reply_markup=markup)
@@ -338,7 +339,8 @@ def choose_shape(message, cake):
     buttons = [types.InlineKeyboardButton(text=f'{shape.title}\n(+{shape.price}р)', callback_data=f'choose_topping;{cake.id};{shape.id};') for
                shape in shapes]
     markup = types.InlineKeyboardMarkup()
-    markup.add(*buttons)
+    for btn in buttons:
+        markup.add(btn)
 
     media = [InputMediaPhoto(shape.image) if shape.image else None for shape in shapes]
     media = list(set(media))
@@ -357,7 +359,8 @@ def choose_topping(message, cake):
     buttons = [types.InlineKeyboardButton(text=f'{topping.title}\n(+{topping.price}р)', callback_data=f'choose_berries;{cake.id};{topping.id};')
                for topping in toppings]
     markup = types.InlineKeyboardMarkup()
-    markup.add(*buttons)
+    for btn in buttons:
+        markup.add(btn)
 
     media = [InputMediaPhoto(topping.image) if topping.image else None for topping in toppings]
     media = list(set(media))
@@ -376,7 +379,8 @@ def choose_berries(message, cake):
     buttons = [types.InlineKeyboardButton(text=f'{berry.title}\n(+{berry.price}р)', callback_data=f'choose_decor;{cake.id};{berry.id};') for
                berry in berries]
     markup = types.InlineKeyboardMarkup()
-    markup.add(*buttons)
+    for btn in buttons:
+        markup.add(btn)
 
     media = [InputMediaPhoto(berry.image) if berry.image else None for berry in berries]
     media = list(set(media))
@@ -395,7 +399,8 @@ def choose_decor(message, cake):
     buttons = [types.InlineKeyboardButton(text=f'{decor.title}\n(+{decor.price}р)', callback_data=f'choose_cake_text;{cake.id};{decor.id};') for
                decor in decors]
     markup = types.InlineKeyboardMarkup()
-    markup.add(*buttons)
+    for btn in buttons:
+        markup.add(btn)
 
     media = [InputMediaPhoto(decor.image) if decor.image else None for decor in decors]
     media = list(set(media))
