@@ -228,7 +228,7 @@ class Order(models.Model):
         order_price = cake_price * \
                       (1 - (self.promo_code.discount if self.promo_code else 0)) * \
                       (1 + (URGENT_ORDER_ALLOWANCE if self.is_urgent_order() else 0))
-        return round(order_price, 2)
+        return round(float(order_price), 2)
 
     def get_description(self, with_cake=True, with_cake_price=False):
         message = f'{self.__str__()}:\n'
