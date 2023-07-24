@@ -316,7 +316,7 @@ def set_cake_text(message, msg_text, cake_id):
 
 def choose_level(message, cake):
     levels = Level.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=f'{level.title}\n(+{level.price}р)', callback_data=f'choose_shape;{cake.id};{level.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{level.title} (+{level.price}р)', callback_data=f'choose_shape;{cake.id};{level.id};') for
                level in levels]
     media = [InputMediaPhoto(level.image) if level.image else None for level in levels]
     media = list(set(media))
@@ -336,7 +336,7 @@ def choose_level(message, cake):
 
 def choose_shape(message, cake):
     shapes = Shape.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=f'{shape.title}\n(+{shape.price}р)', callback_data=f'choose_topping;{cake.id};{shape.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{shape.title} (+{shape.price}р)', callback_data=f'choose_topping;{cake.id};{shape.id};') for
                shape in shapes]
     markup = types.InlineKeyboardMarkup()
     for btn in buttons:
@@ -376,7 +376,7 @@ def choose_topping(message, cake):
 
 def choose_berries(message, cake):
     berries = Berries.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=f'{berry.title}\n(+{berry.price}р)', callback_data=f'choose_decor;{cake.id};{berry.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{berry.title} (+{berry.price}р)', callback_data=f'choose_decor;{cake.id};{berry.id};') for
                berry in berries]
     markup = types.InlineKeyboardMarkup()
     for btn in buttons:
@@ -396,7 +396,7 @@ def choose_berries(message, cake):
 
 def choose_decor(message, cake):
     decors = Decor.objects.filter(is_available=True)
-    buttons = [types.InlineKeyboardButton(text=f'{decor.title}\n(+{decor.price}р)', callback_data=f'choose_cake_text;{cake.id};{decor.id};') for
+    buttons = [types.InlineKeyboardButton(text=f'{decor.title} (+{decor.price}р)', callback_data=f'choose_cake_text;{cake.id};{decor.id};') for
                decor in decors]
     markup = types.InlineKeyboardMarkup()
     for btn in buttons:
