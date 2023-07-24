@@ -177,6 +177,7 @@ def callback_query(call):
                          reply_markup=markup)
 
     elif call.data.startswith('no_comment_order'):
+        bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
         order_id = callback_data[1]
         order = Order.objects.get(id=order_id)
         set_order_comment(call.message, 'Без комментариев', order)
