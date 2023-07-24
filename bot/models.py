@@ -120,7 +120,8 @@ class Cake(models.Model):
                 self.topping, self.berries, self.topping]
 
     def get_price(self):
-        return sum([param.price if param else 0 for param in self.get_params()])
+        return sum([param.price if param else 0 for param in self.get_params()]) + \
+                   (0 if self.text == 'Без надписи.' or self.text is None else 500)
 
     def get_composition(self, with_price=True):
         message = f'{self.__str__()}\n' \
@@ -224,7 +225,7 @@ class Order(models.Model):
         return delta < timedelta(days=1)
 
     def get_price(self):
-        cake_price = self.cake.get_price()
+        cake_price = int(self.cake.get_price())
         order_price = cake_price * \
                       (1 - (self.promo_code.discount if self.promo_code else 0)) * \
                       (1 + (URGENT_ORDER_ALLOWANCE if self.is_urgent_order() else 0))
@@ -254,7 +255,7 @@ class Order(models.Model):
             message += 'С учетом надбавки за срочный заказ ' \
                        f'в {URGENT_ORDER_ALLOWANCE * 100}%\n'
 
-        message += f'Стоимость заказа <b>{self.get_price()} руб.</b>'
+        message += f'Стоимость заказа {self.get_price()} руб.'
         return message
 
     def __str__(self):
