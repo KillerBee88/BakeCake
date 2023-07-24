@@ -1,0 +1,14 @@
+[Unit]
+Description=BakeCake site for Admin
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pavel-vps/deployements/depl-1/BakeCake
+ExecStart=/usr/bin/python3 /home/pavel-vps/deployements/depl-1/BakeCake/manage.py bot
+RestartSec=30
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
