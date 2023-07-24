@@ -237,7 +237,7 @@ def accept_order(message, order_id):
     markup.add(*buttons)
 
     bot.send_message(message.chat.id,
-                     f'Вот ваш заказ:\n{order}\nПодтверждаете заказ?',
+                     f'Вот ваш заказ:\n{order.get_description()}\nПодтверждаете заказ?',
                      reply_markup=markup)
 
 
