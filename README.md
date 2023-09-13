@@ -6,7 +6,7 @@
 Демо:
 - [Бот](https://t.me/bakeyourcakebot)
 - [Админский канал](https://t.me/+sbEwmTN1hEFmYjYy), где бот постит заказы.
-- Админка: http://193.168.49.50:8000/admin/ . Логин: guest1, пароль: guest. 
+- Админка: [http://193.168.49.50:8000/admin/](http://bakecake.pas-zhukov.ru/admin/) . Логин: guest1, пароль: guest. 
 
 Проект состоит из 2 компонент:
 1. Админка Django (для управления всем) + БД
